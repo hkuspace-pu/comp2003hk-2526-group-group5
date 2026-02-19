@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   provider: ^6.1.2
-  shared_preferences: ^2.3.2
+  shared_preferences: ^2.3.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -68,6 +68,7 @@ flutter:
     - images/road.png
     - images/river.png
     - images/bridge.png
+    - images/home_city_image.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
