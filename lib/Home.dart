@@ -116,8 +116,8 @@ class HomeScreen extends StatelessWidget {
                       // Navigate to sign up - functionality can be added later
                     },
                     style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: Color(0xFF3CB371), width: 2),
-                      foregroundColor: const Color(0xFF3CB371),
+                      side: const BorderSide(color: Color(0xFF46AA57), width: 2),
+                      foregroundColor: const Color(0xFF46AA57),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
