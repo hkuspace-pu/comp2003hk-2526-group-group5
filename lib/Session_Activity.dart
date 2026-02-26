@@ -16,6 +16,7 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const SessionCompleteScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -28,18 +29,17 @@ class SessionCompleteScreen extends StatefulWidget {
 }
 
 class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
-  // We cannot use `image_picker` as it is not an allowed package.
-  // We will simulate media upload by allowing the user to "add" or "remove"
-  // a placeholder image from a network URL.
-  String? _selectedMediaUrl; // Holds the URL of the placeholder image
-  bool _isMediaAdded = false; // Tracks if the placeholder media is "added"
+  String? _selectedMediaUrl;
+  bool _isMediaAdded = false;
   final TextEditingController _commentController = TextEditingController();
+  int _selectedIndex = 0;
 
   // Toggles the presence of the placeholder media.
   void _togglePlaceholderMedia() {
     setState(() {
       _isMediaAdded = !_isMediaAdded;
       // Set the placeholder URL if media is added, otherwise set to null.
+      // Need to connect local database.
       _selectedMediaUrl = _isMediaAdded
           ? 'https://www.gstatic.com/flutter-onestack-prototype/genui/example_1.jpg'
           : null;
@@ -47,8 +47,6 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
   }
 
   void _submitSession() {
-    // In a real application, you would send _selectedMediaUrl and _commentController.text
-    // to a backend service. Here, we just show a confirmation snackbar.
     final String mediaStatus =
     _isMediaAdded ? 'with placeholder media' : 'without media';
     ScaffoldMessenger.of(context).showSnackBar(
@@ -58,11 +56,34 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
     );
   }
 
+  void _onBackPressed() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Back button pressed!')),
+    );
+    // In a real app, you might use Navigator.pop(context) or navigate to a previous screen.
+  }
+
+  // Callback for BottomNavigationBar item taps
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    // In a real app, you would navigate to different screens based on the index.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Tapped item: $index')),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _onBackPressed,
+          color: Colors.white,
+        ),
         title: const Text(
           'Session Activity',
           style: TextStyle(
@@ -70,8 +91,9 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
             fontWeight: FontWeight.bold,
           ),
         ),
+        centerTitle: true,
         backgroundColor: Colors.green,
-        foregroundColor: Colors.white, // Sets color for title and icons
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -100,8 +122,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                   ),
                   const SizedBox(height: 16),
                   GestureDetector(
-                    onTap:
-                    _togglePlaceholderMedia, // Use the new toggle method
+                    onTap: _togglePlaceholderMedia,
                     child: Container(
                       height: 120,
                       width: double.infinity,
@@ -109,9 +130,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                         color: Colors.grey[200],
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: _isMediaAdded
-                              ? Colors.green
-                              : Colors.grey, // Border color based on media presence
+                          color: _isMediaAdded ? Colors.green : Colors.grey,
                           width: 2,
                         ),
                       ),
@@ -121,7 +140,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                           ClipRRect(
                             borderRadius: BorderRadius.circular(10),
                             child: Image.network(
-                              _selectedMediaUrl!, // Display the placeholder network image
+                              _selectedMediaUrl!,
                               fit: BoxFit.cover,
                               width: double.infinity,
                               height: 120,
@@ -152,7 +171,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                           ),
                           SizedBox(height: 8),
                           Text(
-                            'Tap to add placeholder media', // Clarified text
+                            'Tap to add placeholder media',
                             style: TextStyle(
                               color: Colors.grey,
                               fontSize: 14,
@@ -220,6 +239,19 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        type: BottomNavigationBarType.fixed,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey[600],
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+        ],
       ),
     );
   }
