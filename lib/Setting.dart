@@ -1,97 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async'; // Required for Future.delayed
 
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final ImageProvider? customerImage;
+import 'state/app_data_provider.dart';
+import 'state/user_provider.dart';
 
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.customerImage,
-  });
-}
-
-class UserProvider extends ChangeNotifier {
-  User? _currentUser;
-  bool _isLoading = false;
-
-  UserProvider() {
-    // Initialize with a demo user
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: 'jeremy.lee@example.com',
-      customerImage: const AssetImage('images/profile.png'),
-    );
-  }
-
-  /// Currently logged‑in user
-  User? get currentUser => _currentUser;
-
-  /// Whether an async operation is running
-  bool get isLoading => _isLoading;
-
-  /// Simulated login
-  Future<void> login(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 2));
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: email,
-      customerImage: const AssetImage('images/profile.png'),
-    );
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  /// Simulated logout
-  Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-    _currentUser = null;
-
-    _isLoading = false;
-    notifyListeners();
-  }
-}
-
-void main() => runApp(const MyApp());
-
-/// Root widget
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Settings App',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const SettingsPage(),
-      ),
-    );
-  }
-}
 class SettingsGroupTitle extends StatelessWidget {
   final String title;
   const SettingsGroupTitle({super.key, required this.title});
@@ -182,14 +94,8 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  int _selectedIndex = 3;
-
-  void _onItemTapped(int index) {
-    setState(() => _selectedIndex = index);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bottom nav item tapped: ${index + 1}')),
-    );
-  }
+  bool _notifDemo = false;
+  bool _breakDemo = false;
 
   @override
   Widget build(BuildContext context) {
@@ -200,10 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: appBarColor,
         title: const Text('Settings', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: false,
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
@@ -242,22 +145,79 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: 'General Settings',
+                title: '提醒',
                 options: [
-                  ListTile(
-                    leading: const Icon(Icons.notifications),
-                    title: const Text('Notifications'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Notifications settings')),
-                    ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.play_circle_outline),
+                    title: const Text('專注開始提醒'),
+                    subtitle: const Text('之後可接本地通知'),
+                    value: _notifDemo,
+                    activeThumbColor: appBarColor,
+                    onChanged: (v) {
+                      setState(() => _notifDemo = v);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(v ? '已開啟' : '已關閉')),
+                      );
+                    },
                   ),
+                  SwitchListTile(
+                    secondary: const Icon(Icons.coffee_outlined),
+                    title: const Text('休息提醒'),
+                    subtitle: const Text('本地提醒占位'),
+                    value: _breakDemo,
+                    activeThumbColor: appBarColor,
+                    onChanged: (v) => setState(() => _breakDemo = v),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Consumer<AppDataProvider>(
+                builder: (context, appData, _) {
+                  return SettingsGroup(
+                    title: 'Profile',
+                    options: [
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: appData.profiles
+                              .map(
+                                (p) => FilterChip(
+                                  label: Text(p.name),
+                                  selected: p.id == appData.currentProfileId,
+                                  onSelected: (_) => appData.switchProfile(p.id),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.person_add_alt_1),
+                        title: const Text('新增 profile'),
+                        onTap: () async {
+                          await appData.addProfile('Profile ${appData.profiles.length + 1}');
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('已新增 profile')),
+                            );
+                          }
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              SettingsGroup(
+                title: 'General',
+                options: [
                   ListTile(
                     leading: const Icon(Icons.language),
                     title: const Text('Language'),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Language settings')),
+                      const SnackBar(content: Text('Language — placeholder')),
                     ),
                   ),
                 ],
@@ -288,6 +248,35 @@ class _SettingsPageState extends State<SettingsPage> {
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Change password')),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SettingsGroup(
+                title: '資料',
+                options: [
+                  ListTile(
+                    leading: const Icon(Icons.upload_file),
+                    title: const Text('匯出 TSV'),
+                    subtitle: const Text('之後接真檔案'),
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('匯出 — 功能稍後接')),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.download),
+                    title: const Text('匯入 TSV'),
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('匯入 — 功能稍後接')),
+                    ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.favorite_outline),
+                    title: const Text('Health（mock）'),
+                    subtitle: const Text('預覽：今日步數 6234'),
+                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Apple Health / Google Fit 之後接')),
                     ),
                   ),
                 ],
@@ -340,21 +329,6 @@ class _SettingsPageState extends State<SettingsPage> {
             ],
           );
         },
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: appBarColor,
-        unselectedItemColor: Colors.grey.shade700,
-        onTap: _onItemTapped,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
       ),
     );
   }

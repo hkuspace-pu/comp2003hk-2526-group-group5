@@ -107,33 +107,6 @@ class GamificationData extends ChangeNotifier {
   }
 }
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    MultiProvider(
-      providers: <ChangeNotifierProvider<ChangeNotifier>>[
-        ChangeNotifierProvider<GamificationData>(
-            create: (BuildContext context) => GamificationData()),
-        ChangeNotifierProvider<AuthData>(
-            create: (BuildContext context) => AuthData()),
-      ],
-      builder: (BuildContext context, Widget? child) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'User Profile - Gamification',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const UserProfileScreen(),
-      ),
-    ),
-  );
-}
-
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
 
