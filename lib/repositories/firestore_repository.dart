@@ -1,13 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-class FirestoreService {
+/// Remote persistence for user profile, gamification sync, sessions, and related collections.
+class FirestoreRepository {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  /// get the current logged-in user's UID
   String? get uid => FirebaseAuth.instance.currentUser?.uid;
 
-  /// Create initial user document after Sign Up
   Future<void> saveUserInitialData({
     required String uid,
     required String name,
@@ -28,13 +27,11 @@ class FirestoreService {
     });
   }
 
-  /// Get real-time stream of the current user's profile (for auto-updating UI)
   Stream<DocumentSnapshot> getUserStream() {
-    if (uid == null) throw Exception("User not logged in");
+    if (uid == null) throw Exception('User not logged in');
     return _db.collection('users').doc(uid!).snapshots();
   }
 
-  /// Syncs "Focus City" layout, XP, and Level to the cloud
   Future<void> syncGamificationData({
     required int xp,
     required int level,
@@ -51,7 +48,6 @@ class FirestoreService {
     }, SetOptions(merge: true));
   }
 
-  /// Logs a completed Focus Session
   Future<void> logFocusSession({
     required int durationMinutes,
     required int xpEarned,
@@ -59,7 +55,6 @@ class FirestoreService {
   }) async {
     if (uid == null) return;
 
-    /// Add record to sub-collection
     await _db.collection('users').doc(uid!).collection('sessions').add({
       'startTime': FieldValue.serverTimestamp(),
       'duration': durationMinutes,
@@ -67,18 +62,16 @@ class FirestoreService {
       'tag': tag,
     });
 
-    /// Atomically increment total XP in the main document
     await _db.collection('users').doc(uid!).update({
       'totalXp': FieldValue.increment(xpEarned),
       'lastActive': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Logs offline activities (Jogging, Painting) with multimedia links
   Future<void> logOfflineActivity({
     required String activityType,
     required String comment,
-    required List<String> mediaUrls,   // Links from Firebase Storage
+    required List<String> mediaUrls,
     required int xpBonus,
   }) async {
     if (uid == null) return;
@@ -91,14 +84,12 @@ class FirestoreService {
       'xpBonus': xpBonus,
     });
 
-    /// Update total XP
     await _db.collection('users').doc(uid!).update({
       'totalXp': FieldValue.increment(xpBonus),
       'lastActive': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Saves daily mood index and reflection
   Future<void> saveMoodLog(int moodIndex, String reflection) async {
     if (uid == null) return;
     await _db.collection('users').doc(uid!).collection('moodLogs').add({
@@ -108,7 +99,6 @@ class FirestoreService {
     });
   }
 
-  /// Connects Apple Health / Google Fit data to Firebase
   Future<void> syncHealthData({
     required int steps,
     required double calories,
@@ -116,7 +106,6 @@ class FirestoreService {
   }) async {
     if (uid == null) return;
 
-    // Record health sync history
     await _db.collection('users').doc(uid!).collection('healthLogs').add({
       'timestamp': FieldValue.serverTimestamp(),
       'steps': steps,
@@ -124,14 +113,12 @@ class FirestoreService {
       'xpBonus': xpBonus,
     });
 
-    // Award XP and update last active time
     await _db.collection('users').doc(uid!).update({
       'totalXp': FieldValue.increment(xpBonus),
       'lastActive': FieldValue.serverTimestamp(),
     });
   }
 
-  /// Allows a Counselor to see all users assigned to them
   Stream<QuerySnapshot> getCounselees(String counselorId) {
     return _db
         .collection('users')
@@ -139,4 +126,3 @@ class FirestoreService {
         .snapshots();
   }
 }
-

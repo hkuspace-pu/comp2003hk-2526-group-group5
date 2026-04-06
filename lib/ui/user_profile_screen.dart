@@ -1,141 +1,14 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final ImageProvider? customerImage;
-
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.customerImage,
-  });
-}
-
-/// Manages authentication credentials for specific actions.
-class AuthData extends ChangeNotifier {
-  // Hardcoded credentials for the 'Jeremy Lee' user
-  final String _correctEmail = 'jeremy.lee@example.com';
-  final String _correctPassword = 'password123';
-
-  /// Authenticates a user with the given email and password.
-  /// Simulates a network call for authentication.
-  /// Returns true if credentials match, false otherwise.
-  Future<bool> login({required String email, required String password}) async {
-    // Simulate network delay
-    await Future<void>.delayed(const Duration(milliseconds: 500));
-    return email == _correctEmail && password == _correctPassword;
-  }
-}
-
-/// Manages gamification data.
-class GamificationData extends ChangeNotifier {
-  static const String _placeholderImageUrl =
-      'https://www.gstatic.com/flutter-onestack-prototype/genui/example_1.jpg';
-
-  DateTime? _gamificationStartDate;
-  int _totalXp = 0;
-  int _currentLevel = 0;
-
-  int get currentXp => _totalXp;
-  int get currentLevel => _currentLevel;
-  DateTime get gamificationStartDate => _gamificationStartDate ?? DateTime.now();
-
-  GamificationData() {
-    _initializeData();
-  }
-
-  Future<void> _initializeData() async {
-    await _loadFromStorage();
-    notifyListeners();
-  }
-
-  Future<void> _loadFromStorage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    _gamificationStartDate = DateTime.fromMillisecondsSinceEpoch(
-      prefs.getInt('gamificationStartTime') ??
-          DateTime.now().millisecondsSinceEpoch,
-    );
-    _totalXp = prefs.getInt('totalXp') ?? 1500;
-    _currentLevel = prefs.getInt('currentLevel') ?? 4;
-  }
-
-  Future<void> _saveToStorage() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(
-        'gamificationStartTime', gamificationStartDate.millisecondsSinceEpoch);
-    await prefs.setInt('totalXp', _totalXp);
-    await prefs.setInt('currentLevel', _currentLevel);
-  }
-
-  Future<void> addFocusTime(Duration sessionDuration,
-      {int xpPerMinute = 5}) async {
-    final int xpGained = (sessionDuration.inMinutes * xpPerMinute).toInt();
-    await addXp(xpGained);
-    await _saveToStorage();
-    notifyListeners();
-  }
-
-  Future<void> addXp(int xp) async {
-    _totalXp += xp;
-    _updateLevel();
-  }
-
-  void _updateLevel() {
-    _currentLevel = (_totalXp / 250).floor().clamp(0, 10);
-  }
-
-  int get totalItemsCollected => 0;
-
-  String get timeSpentString {
-    final Duration duration = DateTime.now().difference(gamificationStartDate);
-    final int days = duration.inDays;
-    final int hours = duration.inHours.remainder(24);
-    final int minutes = duration.inMinutes.remainder(60);
-
-    final List<String> parts = <String>[];
-    if (days > 0) parts.add('$days day${days == 1 ? '' : 's'}');
-    if (hours > 0) parts.add('$hours hour${hours == 1 ? '' : 's'}');
-    if (minutes > 0) parts.add('$minutes minute${minutes == 1 ? '' : 's'}');
-
-    return parts.isEmpty ? 'Just started!' : parts.join(', ');
-  }
-}
-
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  runApp(
-    MultiProvider(
-      providers: <ChangeNotifierProvider<ChangeNotifier>>[
-        ChangeNotifierProvider<GamificationData>(
-            create: (BuildContext context) => GamificationData()),
-        ChangeNotifierProvider<AuthData>(
-            create: (BuildContext context) => AuthData()),
-      ],
-      builder: (BuildContext context, Widget? child) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'User Profile - Gamification',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const UserProfileScreen(),
-      ),
-    ),
-  );
-}
+import 'package:groupproject_group5/state/profile_auth_data.dart';
+import 'package:groupproject_group5/state/profile_gamification_data.dart';
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+  const UserProfileScreen({super.key, this.embedInMainShell = false});
+
+  /// When true, hides duplicate [BottomNavigationBar].
+  final bool embedInMainShell;
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -162,9 +35,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               backgroundColor: appBarColor,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Root screen')),
-                ),
+                onPressed: () => Navigator.maybePop(context),
               ),
               title: const Text('Account', style: TextStyle(color: Colors.white)),
               centerTitle: true,
@@ -276,21 +147,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 const SizedBox(height: 80),
               ],
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: appBarColor,
-              unselectedItemColor: Colors.grey.shade700,
-              onTap: _onItemTapped,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-            ),
+            bottomNavigationBar: widget.embedInMainShell
+                ? null
+                : BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                      BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                      BottomNavigationBarItem(
+                          icon: Icon(Icons.area_chart), label: ''),
+                      BottomNavigationBarItem(
+                          icon: Icon(Icons.settings), label: ''),
+                    ],
+                    currentIndex: _selectedIndex,
+                    selectedItemColor: appBarColor,
+                    unselectedItemColor: Colors.grey.shade700,
+                    onTap: _onItemTapped,
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                  ),
           ),
     );
   }

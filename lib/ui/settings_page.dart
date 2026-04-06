@@ -1,97 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async'; // Required for Future.delayed
 
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final ImageProvider? customerImage;
+import 'package:groupproject_group5/app/app_routes.dart';
+import 'package:groupproject_group5/models/user.dart';
+import 'package:groupproject_group5/state/user_provider.dart';
 
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.customerImage,
-  });
-}
-
-class UserProvider extends ChangeNotifier {
-  User? _currentUser;
-  bool _isLoading = false;
-
-  UserProvider() {
-    // Initialize with a demo user
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: 'jeremy.lee@example.com',
-      customerImage: const AssetImage('images/profile.png'),
-    );
-  }
-
-  /// Currently logged‑in user
-  User? get currentUser => _currentUser;
-
-  /// Whether an async operation is running
-  bool get isLoading => _isLoading;
-
-  /// Simulated login
-  Future<void> login(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 2));
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: email,
-      customerImage: const AssetImage('images/profile.png'),
-    );
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  /// Simulated logout
-  Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-    _currentUser = null;
-
-    _isLoading = false;
-    notifyListeners();
-  }
-}
-
-void main() => runApp(const MyApp());
-
-/// Root widget
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Settings App',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const SettingsPage(),
-      ),
-    );
-  }
-}
 class SettingsGroupTitle extends StatelessWidget {
   final String title;
   const SettingsGroupTitle({super.key, required this.title});
@@ -175,7 +88,10 @@ class SettingsGroup extends StatelessWidget {
 
 /// Main settings page.
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.embedInMainShell = false});
+
+  /// When true, used inside [MainShell] — hides duplicate bottom bar and back affordance.
+  final bool embedInMainShell;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -200,10 +116,13 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: appBarColor,
         title: const Text('Settings', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: !widget.embedInMainShell,
+        leading: widget.embedInMainShell
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.maybePop(context),
+              ),
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
@@ -235,15 +154,20 @@ class _SettingsPageState extends State<SettingsPage> {
               UserProfileTile(
                 user: user,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User profile tapped')),
-                  );
+                  Navigator.of(context).pushNamed(AppRoutes.profile);
                 },
               ),
               const SizedBox(height: 16),
               SettingsGroup(
                 title: 'General Settings',
                 options: [
+                  ListTile(
+                    leading: const Icon(Icons.timer_outlined),
+                    title: const Text('Session activity'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.session),
+                  ),
                   ListTile(
                     leading: const Icon(Icons.notifications),
                     title: const Text('Notifications'),
@@ -341,21 +265,24 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: appBarColor,
-        unselectedItemColor: Colors.grey.shade700,
-        onTap: _onItemTapped,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-      ),
+      bottomNavigationBar: widget.embedInMainShell
+          ? null
+          : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.area_chart), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: appBarColor,
+              unselectedItemColor: Colors.grey.shade700,
+              onTap: _onItemTapped,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+            ),
     );
   }
 }
