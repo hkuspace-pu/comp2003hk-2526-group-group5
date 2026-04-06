@@ -977,6 +977,7 @@ class DraggableUnlockableItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const double size = 48;
+    final tr = context.watch<LocaleController>();
 
     if (!isUnlocked) {
       return Opacity(
@@ -1010,7 +1011,7 @@ class DraggableUnlockableItem extends StatelessWidget {
     }
 
     return Tooltip(
-      message: '按住拖到上方綠色區域',
+      message: tr.focusDragItemTooltip,
       child: Draggable<ItemType>(
         data: itemInfo.type,
         feedback: Material(
@@ -1080,7 +1081,7 @@ class DraggableUnlockableItem extends StatelessWidget {
               style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w600),
             ),
             Text(
-              '拖到公園',
+              tr.focusDragItemToParkHint,
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green.shade800),
             ),
           ],

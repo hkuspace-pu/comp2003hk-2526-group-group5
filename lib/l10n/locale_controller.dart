@@ -67,6 +67,12 @@ class LocaleController extends ChangeNotifier {
   String get focusEditDurationInvalid => isEnglish
       ? 'Enter a whole number from 1 to 180.'
       : '請輸入 1 至 180 嘅整數。';
+  /// Hint under draggable city items (inventory tray).
+  String get focusDragItemToParkHint =>
+      isEnglish ? 'Drag to park' : '拖到公園';
+  String get focusDragItemTooltip => isEnglish
+      ? 'Hold and drag to the green area above'
+      : '按住拖到上方綠色區域';
 
   // —— Settings ——
   String get settingsTitle => isEnglish ? 'Settings' : '設定';
