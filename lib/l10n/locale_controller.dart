@@ -110,6 +110,10 @@ class LocaleController extends ChangeNotifier {
   String get activityMediaFile => isEnglish ? 'Or pick a file' : '或選擇檔案';
   String get activityPickFile => isEnglish ? 'Choose file' : '選擇檔案';
   String get activityClearFile => isEnglish ? 'Clear file' : '清除檔案';
+  String get activityFileTooLarge =>
+      isEnglish ? 'Image too large (max 4 MB)' : '圖片太大（上限 4 MB）';
+  String get activityPickFileError =>
+      isEnglish ? 'Could not read file' : '無法讀取檔案';
   String get activitySubmit => isEnglish ? 'Submit' : '提交';
   String get activitySaved => isEnglish ? 'Saved' : '已儲存';
   String get activityRecent => isEnglish ? 'Recent' : '最近紀錄';

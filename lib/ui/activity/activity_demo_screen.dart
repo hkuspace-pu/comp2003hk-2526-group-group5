@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
@@ -6,7 +9,7 @@ import '../../l10n/locale_controller.dart';
 import '../../models/activity_entry.dart';
 import '../../state/app_data_provider.dart';
 
-/// Activity log form + optional media URL (no upload yet).
+/// Activity log with optional media URL or imported image file (stored as data URL).
 class ActivityDemoScreen extends StatefulWidget {
   const ActivityDemoScreen({super.key});
 
@@ -19,12 +22,70 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
   final _desc = TextEditingController();
   final _url = TextEditingController();
 
+  /// In-memory data URL (`data:image/...;base64,...`) from [FilePicker].
+  String? _pickedDataUrl;
+  String? _pickedFileName;
+
+  static const int _maxImageBytes = 4 * 1024 * 1024;
+
   @override
   void dispose() {
     _type.dispose();
     _desc.dispose();
     _url.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImageFile() async {
+    final tr = context.read<LocaleController>();
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+      withData: true,
+    );
+    if (result == null || result.files.isEmpty) return;
+    final picked = result.files.single;
+    final bytes = picked.bytes;
+    if (bytes == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr.activityPickFileError)),
+        );
+      }
+      return;
+    }
+    if (bytes.length > _maxImageBytes) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(tr.activityFileTooLarge)),
+        );
+      }
+      return;
+    }
+    final name = picked.name.toLowerCase();
+    final mime = name.endsWith('.png')
+        ? 'image/png'
+        : name.endsWith('.webp')
+            ? 'image/webp'
+            : 'image/jpeg';
+    final dataUrl = 'data:$mime;base64,${base64Encode(bytes)}';
+    setState(() {
+      _pickedDataUrl = dataUrl;
+      _pickedFileName = picked.name;
+    });
+  }
+
+  void _clearPickedFile() {
+    setState(() {
+      _pickedDataUrl = null;
+      _pickedFileName = null;
+    });
+  }
+
+  String? _mediaForSubmit() {
+    final url = _url.text.trim();
+    if (url.isNotEmpty) return url;
+    if (_pickedDataUrl != null) return _pickedDataUrl;
+    return null;
   }
 
   @override
@@ -64,11 +125,38 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
             controller: _url,
             decoration: _dec(tr.activityMediaUrlHint),
           ),
+          const SizedBox(height: 16),
+          Text(tr.activityMediaFile, style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _pickImageFile,
+            icon: const Icon(Icons.add_photo_alternate_outlined),
+            label: Text(tr.activityPickFile),
+          ),
+          if (_pickedFileName != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _pickedFileName!,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(color: Colors.grey.shade800, fontSize: 13),
+                  ),
+                ),
+                TextButton(
+                  onPressed: _clearPickedFile,
+                  child: Text(tr.activityClearFile),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 24),
           FilledButton(
             onPressed: () async {
               final data = context.read<AppDataProvider>();
-              final url = _url.text.trim();
+              final media = _mediaForSubmit();
               await data.addActivity(
                 ActivityEntry(
                   id: const Uuid().v4(),
@@ -76,15 +164,17 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
                   loggedAt: DateTime.now(),
                   type: _type.text.trim().isEmpty ? 'General' : _type.text.trim(),
                   description: _desc.text.trim(),
-                  mediaUrl: url.isEmpty ? null : url,
+                  mediaUrl: media,
                 ),
               );
               if (context.mounted) {
+                final msg = context.read<LocaleController>().activitySaved;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(tr.activitySaved)),
+                  SnackBar(content: Text(msg)),
                 );
                 _desc.clear();
                 _url.clear();
+                _clearPickedFile();
               }
             },
             style: FilledButton.styleFrom(
@@ -113,7 +203,7 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                           ),
-                          trailing: a.mediaUrl != null ? const Icon(Icons.link) : null,
+                          trailing: _mediaThumb(a.mediaUrl),
                         ),
                       ),
                     )
@@ -124,6 +214,41 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
         ],
       ),
     );
+  }
+
+  static Widget? _mediaThumb(String? mediaUrl) {
+    if (mediaUrl == null || mediaUrl.isEmpty) return null;
+    if (mediaUrl.startsWith('data:image')) {
+      final comma = mediaUrl.indexOf(',');
+      if (comma == -1) return const Icon(Icons.image);
+      try {
+        final bytes = base64Decode(mediaUrl.substring(comma + 1));
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.memory(
+            bytes,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+          ),
+        );
+      } catch (_) {
+        return const Icon(Icons.broken_image_outlined);
+      }
+    }
+    if (mediaUrl.startsWith('http')) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: Image.network(
+          mediaUrl,
+          width: 44,
+          height: 44,
+          fit: BoxFit.cover,
+          errorBuilder: (_, _, _) => const Icon(Icons.link),
+        ),
+      );
+    }
+    return const Icon(Icons.attach_file);
   }
 
   static InputDecoration _dec(String hint) {
