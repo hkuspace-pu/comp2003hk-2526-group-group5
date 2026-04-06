@@ -1,5 +1,17 @@
 import 'package:flutter/foundation.dart';
 
+import '../core/demo_login.dart';
+
+/// Built-in demo account for the staff portal (local demo only; replace with real auth later).
+class StaffDemoCredentials {
+  StaffDemoCredentials._();
+
+  static const String email = 'staff@demo.hk';
+
+  /// Same scheme as [DemoLogin.password] with an extra digit (demo-only).
+  static String get password => '${DemoLogin.password}4';
+}
+
 /// Demo staff account for the staff portal (replace with real auth later).
 class StaffUser {
   const StaffUser({
@@ -20,17 +32,29 @@ class StaffProvider extends ChangeNotifier {
   StaffUser? get currentStaff => _current;
   bool get isLoading => _loading;
 
-  /// Demo: accept email containing "staff" and password length ≥ 4.
+  /// Demo: fixed account [StaffDemoCredentials], or any email containing "staff" with password length ≥ 4.
   Future<bool> login(String email, String password) async {
     final trimmed = email.trim();
-    if (trimmed.isEmpty || password.length < 4) {
+    final bool matchesDemo = trimmed.toLowerCase() ==
+            StaffDemoCredentials.email.toLowerCase() &&
+        password == StaffDemoCredentials.password;
+    final bool loose =
+        trimmed.isNotEmpty &&
+            trimmed.toLowerCase().contains('staff') &&
+            password.length >= 4;
+    if (!matchesDemo && !loose) {
       return false;
     }
     _loading = true;
     notifyListeners();
     await Future<void>.delayed(const Duration(milliseconds: 600));
-    final bool ok = trimmed.toLowerCase().contains('staff');
-    if (ok) {
+    if (matchesDemo) {
+      _current = const StaffUser(
+        id: 'staff-demo',
+        name: 'Demo Staff',
+        email: StaffDemoCredentials.email,
+      );
+    } else {
       final local = trimmed.split('@').first;
       _current = StaffUser(
         id: 'staff-${trimmed.hashCode}',
@@ -40,7 +64,7 @@ class StaffProvider extends ChangeNotifier {
     }
     _loading = false;
     notifyListeners();
-    return ok;
+    return true;
   }
 
   void logout() {
