@@ -45,5 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>The app needs photo library access when you attach images to activities.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>The app may use the camera when you capture images for activities.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>Focus Wellbeing reads health data you choose to share for wellbeing insights.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>Focus Wellbeing may write health-related data you authorize.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Motion data helps estimate activity when connecting to health services.</string>
 </dict>
 </plist>
