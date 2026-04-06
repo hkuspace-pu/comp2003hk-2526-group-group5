@@ -1,9 +1,11 @@
 # GitGuardian — https://docs.gitguardian.com/internal-repositories/policies
-# Firebase Web/Android/iOS client keys in these files are expected in-repo for Flutter;
-# access is limited by Firebase Console (bundle ID / SHA-1 / domain), not secrecy of the key string.
+# v2 schema: paths must be under `secret.ignored_paths` (top-level `ignore_paths` is ignored).
+# Firebase Web/Android/iOS client keys are expected in-repo for Flutter; access is limited
+# by Firebase Console (bundle ID / SHA-1 / domain), not secrecy of the key string.
 version: 2
 
-ignore_paths:
-  - lib/firebase_options.dart
-  - android/app/google-services.json
-  - ios/Runner/GoogleService-Info.plist
+secret:
+  ignored_paths:
+    - lib/firebase_options.dart
+    - android/app/google-services.json
+    - ios/Runner/GoogleService-Info.plist
