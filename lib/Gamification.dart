@@ -1,9 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:uuid/uuid.dart';
+
+import 'models/focus_session_record.dart';
+import 'state/app_data_provider.dart';
 
 enum ItemType { tree, park, house, building, road, river, bridge }
 
@@ -195,6 +201,9 @@ class GamificationData extends ChangeNotifier {
   }
 }
 
+/// Countdown (auto-complete at 0) vs stopwatch (manual stop to save).
+enum FocusTimerKind { countdown, stopwatch }
+
 class FocusSessionData extends ChangeNotifier {
   static const Map<int, Duration> levelDurations = {
     0: Duration(minutes: 1), 1: Duration(minutes: 40), 2: Duration(minutes: 60),
@@ -202,17 +211,23 @@ class FocusSessionData extends ChangeNotifier {
   };
   static const Map<int, int> levelXpAwards = {0: 2000, 1: 15, 2: 25, 3: 35, 4: 45, 5: 50, 6: 50};
 
+  final GamificationData gamificationData;
+  final AppDataProvider appData;
+  final Uuid _uuid = const Uuid();
+  late VoidCallback gamificationListener;
+
   Timer? timer;
   bool isRunning = false;
   Duration remainingDuration = Duration.zero;
+  Duration elapsedStopwatch = Duration.zero;
   bool didCompleteNaturally = false;
+  int lastXpAwarded = 0;
   Duration initialDurationForLevel = Duration.zero;
   int xpAwardOnCompletion = 0;
+  FocusTimerKind timerKind = FocusTimerKind.countdown;
+  DateTime? _startedAt;
 
-  final GamificationData gamificationData;
-  late VoidCallback gamificationListener;
-
-  FocusSessionData(this.gamificationData) {
+  FocusSessionData(this.gamificationData, this.appData) {
     _updateSessionSettings(gamificationData.currentCurrentLevel);
     remainingDuration = initialDurationForLevel;
 
@@ -234,9 +249,23 @@ class FocusSessionData extends ChangeNotifier {
   bool get currentDidCompleteNaturally => didCompleteNaturally;
   Duration get currentInitialDuration => initialDurationForLevel;
   int get currentXpAwardOnCompletion => xpAwardOnCompletion;
+  FocusTimerKind get currentTimerKind => timerKind;
+
+  void setTimerKind(FocusTimerKind k) {
+    if (isRunning) return;
+    timerKind = k;
+    elapsedStopwatch = Duration.zero;
+    remainingDuration = initialDurationForLevel;
+    notifyListeners();
+  }
 
   String get formattedTime {
     String twoDigits(int n) => n.toString().padLeft(2, '0');
+    if (timerKind == FocusTimerKind.stopwatch) {
+      final int minutes = elapsedStopwatch.inMinutes;
+      final int seconds = elapsedStopwatch.inSeconds.remainder(60);
+      return '${twoDigits(minutes)}:${twoDigits(seconds)}';
+    }
     final int minutes = remainingDuration.inMinutes;
     final int seconds = remainingDuration.inSeconds.remainder(60);
     return '${twoDigits(minutes)}:${twoDigits(seconds)}';
@@ -244,47 +273,148 @@ class FocusSessionData extends ChangeNotifier {
 
   void startStopSession() {
     if (isRunning) {
-      stopSession();
+      _stopManual();
     } else {
-      if (remainingDuration > Duration.zero) {
-        startSession();
-      } else {
-        didCompleteNaturally = false;
-        remainingDuration = initialDurationForLevel;
-        startSession();
-      }
+      _start();
     }
+  }
+
+  /// Separate game-style 開始 / 停止 buttons.
+  void startFocus() {
+    if (isRunning) return;
+    _start();
+  }
+
+  void stopFocus() {
+    if (!isRunning) return;
+    _stopManual();
+  }
+
+  void _start() {
+    isRunning = true;
+    _startedAt = DateTime.now();
+    didCompleteNaturally = false;
+    lastXpAwarded = 0;
+    if (timerKind == FocusTimerKind.countdown) {
+      if (remainingDuration <= Duration.zero) {
+        remainingDuration = initialDurationForLevel;
+      }
+    } else {
+      elapsedStopwatch = Duration.zero;
+    }
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
     notifyListeners();
   }
 
-  void startSession() {
-    isRunning = true;
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+  void _tick() {
+    if (timerKind == FocusTimerKind.countdown) {
       if (remainingDuration.inSeconds > 0) {
         remainingDuration -= const Duration(seconds: 1);
         notifyListeners();
       } else {
-        didCompleteNaturally = true;
-        stopSession();
-        notifyListeners();
+        timer?.cancel();
+        timer = null;
+        isRunning = false;
+        unawaited(_finalizeAndRecord(naturalComplete: true));
       }
-    });
+    } else {
+      elapsedStopwatch += const Duration(seconds: 1);
+      notifyListeners();
+    }
   }
 
-  void stopSession() {
+  void _stopManual() {
     timer?.cancel();
+    timer = null;
+    if (!isRunning) {
+      notifyListeners();
+      return;
+    }
     isRunning = false;
+    if (_startedAt == null) {
+      notifyListeners();
+      return;
+    }
+    if (timerKind == FocusTimerKind.stopwatch &&
+        elapsedStopwatch.inSeconds < 5) {
+      _startedAt = null;
+      elapsedStopwatch = Duration.zero;
+      notifyListeners();
+      return;
+    }
+    unawaited(_finalizeAndRecord(naturalComplete: false));
+  }
+
+  Future<void> _finalizeAndRecord({required bool naturalComplete}) async {
+    if (_startedAt == null) return;
+    final DateTime start = _startedAt!;
+    final DateTime end = DateTime.now();
+    _startedAt = null;
+
+    final int totalSec = initialDurationForLevel.inSeconds.clamp(1, 86400);
+    int durationSec;
+    String kindStr;
+    if (timerKind == FocusTimerKind.stopwatch) {
+      durationSec = elapsedStopwatch.inSeconds.clamp(1, 86400);
+      kindStr = 'stopwatch';
+      elapsedStopwatch = Duration.zero;
+    } else {
+      durationSec =
+          (totalSec - remainingDuration.inSeconds).clamp(1, totalSec);
+      if (naturalComplete) {
+        durationSec = totalSec;
+      }
+      kindStr = 'countdown';
+      remainingDuration = initialDurationForLevel;
+    }
+
+    int xp;
+    if (timerKind == FocusTimerKind.stopwatch) {
+      final double ratio = durationSec / (totalSec > 0 ? totalSec : 60);
+      xp = (xpAwardOnCompletion * ratio).round().clamp(1, xpAwardOnCompletion);
+    } else if (naturalComplete) {
+      xp = xpAwardOnCompletion;
+    } else {
+      xp = (xpAwardOnCompletion * durationSec / totalSec).round().clamp(
+            1,
+            xpAwardOnCompletion,
+          );
+    }
+
+    lastXpAwarded = xp;
+    didCompleteNaturally = naturalComplete;
+
+    final record = FocusSessionRecord(
+      id: _uuid.v4(),
+      profileId: appData.currentProfileId,
+      start: start,
+      end: end,
+      durationSeconds: durationSec,
+      xpEarned: xp,
+      autoCompleted: naturalComplete,
+      timerKind: kindStr,
+    );
+    await appData.addFocusSession(record);
+    await gamificationData.addXp(xp);
+    notifyListeners();
   }
 
   void resetSession() {
-    stopSession();
+    timer?.cancel();
+    timer = null;
+    isRunning = false;
+    _startedAt = null;
     remainingDuration = initialDurationForLevel;
+    elapsedStopwatch = Duration.zero;
     didCompleteNaturally = false;
+    lastXpAwarded = 0;
     notifyListeners();
   }
 
   void acknowledgeCompletion() {
     didCompleteNaturally = false;
+    lastXpAwarded = 0;
   }
 
   @override
@@ -295,35 +425,44 @@ class FocusSessionData extends ChangeNotifier {
   }
 }
 
-void main() {
-  runApp(const FocusCityApp());
-}
-
-class FocusCityApp extends StatelessWidget {
-  const FocusCityApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => GamificationData()),
-          ChangeNotifierProvider<FocusSessionData>(
-            create: (context) {
-              final gamificationData = Provider.of<GamificationData>(context, listen: false);
-              return FocusSessionData(gamificationData);
-            },
-          ),
-        ],
-        child: const FocusCityPage(),
-      ),
-    );
-  }
-}
-
 class FocusCityPage extends StatelessWidget {
   const FocusCityPage({super.key});
+
+  void _showHistory(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        return Consumer<AppDataProvider>(
+          builder: (context, data, _) {
+            final list = data.sessions;
+            if (list.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.all(24),
+                child: Text('尚無專注紀錄（完成一次計時後會顯示）'),
+              );
+            }
+            return ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: list.length,
+              separatorBuilder: (_, __) => const Divider(height: 1),
+              itemBuilder: (context, i) {
+                final s = list[i];
+                final m = s.durationSeconds ~/ 60;
+                return ListTile(
+                  leading: const Icon(Icons.timer_outlined),
+                  title: Text('$m 分鐘 · +${s.xpEarned} XP'),
+                  subtitle: Text(
+                    s.autoCompleted ? '自動完成（倒數結束）' : '手動結束',
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -333,7 +472,21 @@ class FocusCityPage extends StatelessWidget {
         backgroundColor: const Color(0xFF46AA57),
         elevation: 0,
         centerTitle: true,
-        title: const Text('Focus City', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(
+          'Focus City',
+          style: GoogleFonts.fredoka(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+            fontSize: 22,
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.history, color: Colors.white),
+            tooltip: 'Session 紀錄',
+            onPressed: () => _showHistory(context),
+          ),
+        ],
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -351,18 +504,108 @@ class FocusCityPage extends StatelessWidget {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Text('Build your city with focus sessions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
           ),
-          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: Consumer<FocusSessionData>(
+              builder: (context, focusData, _) {
+                return SegmentedButton<FocusTimerKind>(
+                  segments: const [
+                    ButtonSegment(
+                      value: FocusTimerKind.countdown,
+                      label: Text('倒數（自動記錄）'),
+                      icon: Icon(Icons.hourglass_top, size: 18),
+                    ),
+                    ButtonSegment(
+                      value: FocusTimerKind.stopwatch,
+                      label: Text('碼表（手動停止）'),
+                      icon: Icon(Icons.timer, size: 18),
+                    ),
+                  ],
+                  selected: {focusData.currentTimerKind},
+                  onSelectionChanged: (s) {
+                    if (!focusData.currentIsRunning) {
+                      focusData.setTimerKind(s.first);
+                    }
+                  },
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Consumer<FocusSessionData>(
+              builder: (context, focusData, _) {
+                final gameText = GoogleFonts.fredoka(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  shadows: const [
+                    Shadow(color: Colors.black38, offset: Offset(0, 2), blurRadius: 0),
+                  ],
+                );
+                return Row(
+                  children: [
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: focusData.currentIsRunning ? null : () => focusData.startFocus(),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          disabledBackgroundColor: Colors.grey.shade400,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: const BorderSide(color: Colors.white, width: 2),
+                          ),
+                        ),
+                        child: Text('開始', style: gameText),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: FilledButton(
+                        onPressed: !focusData.currentIsRunning ? null : () => focusData.stopFocus(),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: const Color(0xFFC62828),
+                          disabledBackgroundColor: Colors.grey.shade300,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            side: const BorderSide(color: Colors.white, width: 2),
+                          ),
+                        ),
+                        child: Text('停止', style: gameText),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              '從下方拖曳已解鎖嘅 Tree／Park 等到綠色區域，組裝你嘅城市',
+              style: TextStyle(fontSize: 12, color: Colors.black54, height: 1.3),
+            ),
+          ),
+          const SizedBox(height: 6),
 
           Expanded(
             child: Consumer2<FocusSessionData, GamificationData>(
               builder: (context, focusData, gamificationData, _) {
-                if (focusData.currentDidCompleteNaturally) {
+                if (focusData.lastXpAwarded > 0) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
+                    if (!context.mounted) return;
                     HapticFeedback.vibrate();
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content: Text('Completed! +${focusData.currentXpAwardOnCompletion} XP!'),
-                    ));
-                    gamificationData.addXp(focusData.currentXpAwardOnCompletion);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '已記錄專注 · +${focusData.lastXpAwarded} XP',
+                        ),
+                      ),
+                    );
                     focusData.acknowledgeCompletion();
                   });
                 }
@@ -373,8 +616,10 @@ class FocusCityPage extends StatelessWidget {
                     final bool hideTimer = !focusData.currentIsRunning;
 
                     return Stack(
+                      clipBehavior: Clip.none,
                       children: [
-                        DragTarget<ItemType>(
+                        Positioned.fill(
+                          child: DragTarget<ItemType>(
                           onAcceptWithDetails: (details) {
                             final RenderBox renderBox = context.findRenderObject() as RenderBox;
                             final Offset localOffset = renderBox.globalToLocal(details.offset);
@@ -382,15 +627,74 @@ class FocusCityPage extends StatelessWidget {
                             final double normalizedY = (localOffset.dy / constraints.maxHeight).clamp(0.0, 1.0);
                             gamificationData.placeItem(details.data, Offset(normalizedX, normalizedY));
                           },
-                          builder: (context, _, __) => Container(
-                            color: const Color(0xFF63B63B),
-                            child: hideTimer ? null : Center(
-                              child: Text(
-                                focusData.formattedTime,
-                                style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold, color: Colors.white),
+                          builder: (context, candidateData, rejected) {
+                            final hovering = candidateData.isNotEmpty;
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF63B63B),
+                                border: Border.all(
+                                  color: hovering ? const Color(0xFFFFEB3B) : const Color(0xFF558B2F),
+                                  width: hovering ? 4 : 2,
+                                ),
+                                boxShadow: hovering
+                                    ? [
+                                        BoxShadow(
+                                          color: Colors.amber.withOpacity(0.45),
+                                          blurRadius: 14,
+                                          spreadRadius: 1,
+                                        ),
+                                      ]
+                                    : null,
                               ),
-                            ),
-                          ),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  if (hideTimer)
+                                    Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(20),
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.swipe_up, color: Colors.white.withOpacity(0.85), size: 42),
+                                            const SizedBox(height: 8),
+                                            Text(
+                                              '遊戲區域\n按住下方圖示拖到呢度',
+                                              textAlign: TextAlign.center,
+                                              style: TextStyle(
+                                                color: Colors.white.withOpacity(0.92),
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                                height: 1.35,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  else
+                                    Center(
+                                      child: Text(
+                                        focusData.formattedTime,
+                                        style: GoogleFonts.fredoka(
+                                          fontSize: 52,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          shadows: const [
+                                            Shadow(
+                                              color: Colors.black26,
+                                              offset: Offset(2, 2),
+                                              blurRadius: 0,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
                         ),
 
                         ...gamificationData.currentPlacedItems.asMap().entries.map((entry) {
@@ -435,14 +739,13 @@ class FocusCityPage extends StatelessWidget {
                                     Container(width: itemSize, height: itemSize, color: Colors.grey),
                               ),
                               onDragEnd: (details) {
-                                if (details.offset != null) {
-                                  final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
-                                  if (renderBox != null) {
-                                    final localOffset = renderBox.globalToLocal(details.offset!);
-                                    final newX = (localOffset.dx / constraints.maxWidth).clamp(0.0, 1.0);
-                                    final newY = (localOffset.dy / constraints.maxHeight).clamp(0.0, 1.0);
-                                    gamificationData.updateItemPosition(index, newX, newY);
-                                  }
+                                final o = details.offset;
+                                final RenderBox? renderBox = context.findRenderObject() as RenderBox?;
+                                if (renderBox != null) {
+                                  final localOffset = renderBox.globalToLocal(o);
+                                  final newX = (localOffset.dx / constraints.maxWidth).clamp(0.0, 1.0);
+                                  final newY = (localOffset.dy / constraints.maxHeight).clamp(0.0, 1.0);
+                                  gamificationData.updateItemPosition(index, newX, newY);
                                 }
                               },
                             ),
@@ -492,28 +795,7 @@ class FocusCityPage extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SizedBox(
-              height: 40,
-              width: double.infinity,
-              child: Consumer<FocusSessionData>(
-                builder: (context, focusData, _) => ElevatedButton.icon(
-                  onPressed: focusData.startStopSession,
-                  icon: Icon(focusData.currentIsRunning ? Icons.stop : Icons.play_arrow),
-                  label: Text(focusData.currentIsRunning
-                      ? 'END FOCUS SESSION'
-                      : 'START ${focusData.currentInitialDuration.inMinutes}-MIN FOCUS SESSION'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF46AA57),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: SizedBox(
@@ -533,19 +815,6 @@ class FocusCityPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 12),
-          Container(
-            height: 64,
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: Colors.black12))),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _BottomIcon(icon: Icons.home),
-                _BottomIcon(icon: Icons.event),
-                _BottomIcon(icon: Icons.area_chart),
-                _BottomIcon(icon: Icons.settings),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -597,59 +866,83 @@ class DraggableUnlockableItem extends StatelessWidget {
       );
     }
 
-    return Draggable<ItemType>(
-      data: itemInfo.type,
-      feedback: Material(
-        color: Colors.transparent,
-        child: Image.asset(
-          itemInfo.imagePath,
-          width: size + 16,
-          height: size + 16,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: size + 16,
-            height: size + 16,
-            decoration: BoxDecoration(
-              color: Colors.green,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.image, color: Colors.white, size: 24),
-          ),
-        ),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min, // ✅ FIX 3: Add this too
-        children: [
-          Image.asset(
+    return Tooltip(
+      message: '按住拖到上方綠色區域',
+      child: Draggable<ItemType>(
+        data: itemInfo.type,
+        feedback: Material(
+          elevation: 12,
+          borderRadius: BorderRadius.circular(12),
+          child: Image.asset(
             itemInfo.imagePath,
-            width: size,
-            height: size,
+            width: size + 24,
+            height: size + 24,
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) => Container(
-              width: size,
-              height: size,
+              width: size + 24,
+              height: size + 24,
               decoration: BoxDecoration(
                 color: Colors.green,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(Icons.image, color: Colors.white),
+              child: Icon(Icons.image, color: Colors.white, size: 24),
             ),
           ),
-          const SizedBox(height: 4),
-          Text(itemInfo.label,
-              style: const TextStyle(fontSize: 12, color: Colors.black)),
-          const Text('Place',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
-        ],
+        ),
+        childWhenDragging: Opacity(
+          opacity: 0.35,
+          child: Image.asset(
+            itemInfo.imagePath,
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.12),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.asset(
+                  itemInfo.imagePath,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: size,
+                    height: size,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.image, color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              itemInfo.label,
+              style: const TextStyle(fontSize: 12, color: Colors.black87, fontWeight: FontWeight.w600),
+            ),
+            Text(
+              '拖到公園',
+              style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.green.shade800),
+            ),
+          ],
+        ),
       ),
     );
-  }
-}
-class _BottomIcon extends StatelessWidget {
-  final IconData icon;
-  const _BottomIcon({required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(onPressed: () {}, icon: Icon(icon, color: Colors.black87));
   }
 }
