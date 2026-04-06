@@ -1,23 +1,14 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
-    );
-  }
-}
-
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({
+    super.key,
+    this.onSignIn,
+    this.onSignUp,
+  });
+
+  final VoidCallback? onSignIn;
+  final VoidCallback? onSignUp;
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +73,7 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: () {
-                      // Navigate to login - functionality can be added later
-                    },
+                    onPressed: onSignIn,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF46AA57),
                       foregroundColor: Colors.white,
@@ -112,9 +101,7 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   child: OutlinedButton(
-                    onPressed: () {
-                      // Navigate to sign up - functionality can be added later
-                    },
+                    onPressed: onSignUp,
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF46AA57), width: 2),
                       foregroundColor: const Color(0xFF46AA57),

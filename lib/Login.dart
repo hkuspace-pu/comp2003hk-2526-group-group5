@@ -1,30 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const LoginApp());
-}
-
-class LoginApp extends StatelessWidget {
-  const LoginApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Login Application',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
-            .copyWith(secondary: const Color(0xFF46AA57)),
-      ),
-      home: const LoginScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
+import 'core/demo_login.dart';
+import 'state/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  const LoginScreen({
+    super.key,
+    this.onBack,
+    this.onNavigateSignUp,
+  });
+
+  final VoidCallback? onBack;
+  final VoidCallback? onNavigateSignUp;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -48,41 +36,56 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleLogin() {
+  Future<void> _handleLogin() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
-
-    debugPrint('Attempting login with Email: $email, Password: $password');
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Logging in with $email...')),
-    );
+    final userProvider = context.read<UserProvider>();
+    await userProvider.login(email, password);
+    if (!mounted) return;
+    if (userProvider.currentUser != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Signed in as ${userProvider.currentUser!.email}')),
+      );
+    }
   }
 
   void _handleForgotPassword() {
-    debugPrint('Forgot Password pressed');
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Navigating to forgot password screen...')),
+      const SnackBar(content: Text('Forgot password flow — connect Supabase in Phase 2')),
     );
   }
 
   void _handleGoogleSignIn() {
-    debugPrint('Sign in with Google pressed');
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Initiating Google Sign-in...')),
+      const SnackBar(content: Text('Google sign-in — optional integration later')),
     );
   }
 
-  void _handleSignUp() {
-    debugPrint('Sign Up pressed');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Navigating to sign up screen...')),
-    );
+  void _handleSignUpTap() {
+    if (widget.onNavigateSignUp != null) {
+      widget.onNavigateSignUp!();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Open sign up')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
+      appBar: widget.onBack != null
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: Colors.black87,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: widget.onBack,
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -106,14 +109,73 @@ class _LoginScreenState extends State<LoginScreen> {
                   height: 1.4,
                 ),
               ),
-              const SizedBox(height: 32),
-
-              // Email field
-              const Text('Email',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87)),
+              const SizedBox(height: 20),
+              Card(
+                color: const Color(0xFFE8F5E9),
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: Colors.green.shade300),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.badge_outlined, color: Colors.green.shade800, size: 22),
+                          const SizedBox(width: 8),
+                          Text(
+                            '測試帳號',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                              color: Colors.green.shade900,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 10),
+                      SelectableText(
+                        'Email：${DemoLogin.email}\nPassword：${DemoLogin.password}',
+                        style: TextStyle(
+                          fontSize: 14,
+                          height: 1.45,
+                          color: Colors.grey.shade800,
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '亦可以隨意輸入其他 Email／Password（demo 模式會登入）。',
+                        style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.3),
+                      ),
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: () {
+                            _emailController.text = DemoLogin.email;
+                            _passwordController.text = DemoLogin.password;
+                          },
+                          icon: const Icon(Icons.content_paste_go, size: 20),
+                          label: const Text('一鍵填入'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                'Email',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: _emailController,
@@ -136,17 +198,18 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: const BorderSide(color: Colors.grey, width: 1),
                   ),
                   contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
               ),
               const SizedBox(height: 20),
-
-              // Password field
-              const Text('Password',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87)),
+              const Text(
+                'Password',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
               const SizedBox(height: 12),
               TextField(
                 controller: _passwordController,
@@ -169,12 +232,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: const BorderSide(color: Colors.grey, width: 1),
                   ),
                   contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
                 ),
               ),
               const SizedBox(height: 8),
-
-              // Forgot Password
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
@@ -190,35 +251,42 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 24), // Spacing before login button
-
-              // Login Button
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _handleLogin, // Login button is always clickable
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF46AA57),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 24),
+              Consumer<UserProvider>(
+                builder: (context, up, _) => SizedBox(
+                  width: double.infinity,
+                  height: 56,
+                  child: ElevatedButton(
+                    onPressed: up.isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF46AA57),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 8,
                     ),
-                    elevation: 8,
-                  ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    child: up.isLoading
+                        ? const SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Google Sign In
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -230,7 +298,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 20,
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.account_circle, size: 20),
+                        const Icon(Icons.account_circle, size: 20),
                   ),
                   label: const Text(
                     'Sign in with Google',
@@ -246,8 +314,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               const SizedBox(height: 32),
-
-              // Signup footer
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -256,11 +322,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   GestureDetector(
-                    onTap: _handleSignUp,
-                    child: Text(
+                    onTap: _handleSignUpTap,
+                    child: const Text(
                       'Sign up',
                       style: TextStyle(
-                        color: const Color(0xFF46AA57),
+                        color: Color(0xFF46AA57),
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),

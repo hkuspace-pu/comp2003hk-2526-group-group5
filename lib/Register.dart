@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
-}
+import 'state/user_provider.dart';
 
 class SignUpData extends ChangeNotifier {
   bool _privacyPolicyAccepted;
@@ -52,35 +50,10 @@ class SignUpData extends ChangeNotifier {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SignUpData>(
-      create: (BuildContext context) => SignUpData(),
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Sign Up App',
-          theme: ThemeData(
-            primarySwatch: Colors.green,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              iconTheme: IconThemeData(color: Colors.black87),
-            ),
-          ),
-          home: const SignUpScreen(),
-        );
-      },
-    );
-  }
-}
-
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key});
+  const SignUpScreen({super.key, this.onBack});
+
+  final VoidCallback? onBack;
 
   void _handleSignUp(BuildContext context, SignUpData signUpData) {
     if (signUpData.privacyPolicyAccepted) {
@@ -102,8 +75,10 @@ class SignUpScreen extends StatelessWidget {
       // In a real application, this would involve sending data to a server
       // or performing local authentication.
       // For this example, we'll just print the data and show a snackbar.
-      print(
-          'Attempting sign up with Username: $userName, Email: $email, Password: $password');
+      context.read<UserProvider>().registerLocalAccount(
+            name: userName,
+            email: email,
+          );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -111,8 +86,6 @@ class SignUpScreen extends StatelessWidget {
           duration: const Duration(seconds: 2),
         ),
       );
-      // Example: Navigate to another screen after successful signup
-      // Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const HomeScreen()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -127,6 +100,17 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
+      appBar: onBack != null
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              foregroundColor: Colors.black87,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: onBack,
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
