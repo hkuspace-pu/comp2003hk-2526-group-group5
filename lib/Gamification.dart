@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 import 'l10n/locale_controller.dart';
 import 'models/focus_session_record.dart';
+import 'widgets/app_language_toggle.dart';
 import 'state/app_data_provider.dart';
 
 enum ItemType { tree, park, house, building, road, river, bridge }
@@ -206,10 +207,13 @@ class GamificationData extends ChangeNotifier {
 enum FocusTimerKind { countdown, stopwatch }
 
 class FocusSessionData extends ChangeNotifier {
-  static const Map<int, Duration> levelDurations = {
-    0: Duration(minutes: 1), 1: Duration(minutes: 40), 2: Duration(minutes: 60),
-    3: Duration(minutes: 90), 4: Duration(minutes: 120), 5: Duration(minutes: 150), 6: Duration(minutes: 180),
-  };
+  /// Default session length (countdown target and stopwatch XP reference).
+  static const Duration defaultSessionDuration = Duration(minutes: 25);
+  static const int minSessionMinutes = 1;
+  static const int maxSessionMinutes = 180;
+
+  static const String _prefsKeySessionMinutes = 'focus_session_minutes';
+
   static const Map<int, int> levelXpAwards = {0: 2000, 1: 15, 2: 25, 3: 35, 4: 45, 5: 50, 6: 50};
 
   final GamificationData gamificationData;
@@ -231,8 +235,10 @@ class FocusSessionData extends ChangeNotifier {
   DateTime? _startedAt;
 
   FocusSessionData(this.gamificationData, this.appData) {
-    _updateSessionSettings(gamificationData.currentCurrentLevel);
+    initialDurationForLevel = defaultSessionDuration;
     remainingDuration = initialDurationForLevel;
+    unawaited(_loadSessionDurationFromPrefs());
+    _updateSessionSettings(gamificationData.currentCurrentLevel);
 
     gamificationListener = () {
       final int newLevel = gamificationData.currentCurrentLevel;
@@ -243,8 +249,31 @@ class FocusSessionData extends ChangeNotifier {
   }
 
   void _updateSessionSettings(int level) {
-    initialDurationForLevel = levelDurations[level] ?? levelDurations[0]!;
     xpAwardOnCompletion = levelXpAwards[level] ?? levelXpAwards[0]!;
+  }
+
+  Future<void> _loadSessionDurationFromPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final mins = prefs.getInt(_prefsKeySessionMinutes);
+    if (mins == null) return;
+    await setSessionTargetMinutes(
+      mins.clamp(minSessionMinutes, maxSessionMinutes),
+      persist: false,
+    );
+  }
+
+  /// Sets countdown/stopwatch target length. Ignored while a session is active.
+  Future<void> setSessionTargetMinutes(int minutes, {bool persist = true}) async {
+    if (hasActiveSession) return;
+    final m = minutes.clamp(minSessionMinutes, maxSessionMinutes);
+    initialDurationForLevel = Duration(minutes: m);
+    remainingDuration = initialDurationForLevel;
+    elapsedStopwatch = Duration.zero;
+    if (persist) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(_prefsKeySessionMinutes, m);
+    }
+    notifyListeners();
   }
 
   bool get currentIsRunning => isRunning;
@@ -443,6 +472,52 @@ class FocusSessionData extends ChangeNotifier {
 class FocusCityPage extends StatelessWidget {
   const FocusCityPage({super.key});
 
+  void _showEditDurationDialog(BuildContext context) {
+    final focus = context.read<FocusSessionData>();
+    final tr = context.read<LocaleController>();
+    final controller = TextEditingController(
+      text: '${focus.initialDurationForLevel.inMinutes}',
+    );
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(tr.focusEditDurationTitle),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: tr.focusEditDurationMinutesLabel,
+            suffixText: tr.isEnglish ? 'min' : '分鐘',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(tr.focusEditDurationCancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final v = int.tryParse(controller.text.trim());
+              if (v == null ||
+                  v < FocusSessionData.minSessionMinutes ||
+                  v > FocusSessionData.maxSessionMinutes) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(tr.focusEditDurationInvalid)),
+                  );
+                }
+                return;
+              }
+              await focus.setSessionTargetMinutes(v);
+              if (ctx.mounted) Navigator.pop(ctx);
+            },
+            child: Text(tr.focusEditDurationSave),
+          ),
+        ],
+      ),
+    ).then((_) => controller.dispose());
+  }
+
   void _showHistory(BuildContext context) {
     final tr = context.read<LocaleController>();
     showModalBottomSheet<void>(
@@ -506,6 +581,7 @@ class FocusCityPage extends StatelessWidget {
             tooltip: tr.focusSessionHistory,
             onPressed: () => _showHistory(context),
           ),
+          const AppLanguageToggle(),
         ],
       ),
       body: Column(
@@ -550,6 +626,33 @@ class FocusCityPage extends StatelessWidget {
                       focusData.setTimerKind(s.first);
                     }
                   },
+                );
+              },
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+            child: Consumer<FocusSessionData>(
+              builder: (context, focusData, _) {
+                if (focusData.hasActiveSession) {
+                  return const SizedBox.shrink();
+                }
+                return ListTile(
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                  leading: const Icon(Icons.schedule, color: Color(0xFF2E7D32)),
+                  title: Text(
+                    '${focusData.initialDurationForLevel.inMinutes} ${tr.isEnglish ? 'min' : '分鐘'} · ${tr.focusSessionLengthTitle}',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  subtitle: Text(
+                    tr.focusSessionLengthSubtitle,
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                  trailing: IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    tooltip: tr.focusEditDurationTitle,
+                    onPressed: () => _showEditDurationDialog(context),
+                  ),
                 );
               },
             ),
@@ -699,7 +802,7 @@ class FocusCityPage extends StatelessWidget {
                                             Icon(Icons.swipe_up, color: Colors.white.withOpacity(0.85), size: 42),
                                             const SizedBox(height: 8),
                                             Text(
-                                              '遊戲區域\n按住下方圖示拖到呢度',
+                                              '${tr.focusGameAreaTitle}\n${tr.focusGameAreaDragInstruction}',
                                               textAlign: TextAlign.center,
                                               style: TextStyle(
                                                 color: Colors.white.withOpacity(0.92),

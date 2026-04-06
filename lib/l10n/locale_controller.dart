@@ -42,6 +42,11 @@ class LocaleController extends ChangeNotifier {
   String get focusDragHint => isEnglish
       ? 'Drag unlocked items from below into the green area to build your city'
       : '從下方拖曳已解鎖嘅圖示到綠色區域，組裝你嘅城市';
+  /// Center overlay when timer is idle (two lines, same as in-game hint).
+  String get focusGameAreaTitle => isEnglish ? 'Game area' : '遊戲區域';
+  String get focusGameAreaDragInstruction => isEnglish
+      ? 'Press and hold an icon below, then drag it here'
+      : '按住下方圖示拖到呢度';
   String get focusNoSessionsYet => isEnglish
       ? 'No focus logs yet (complete a session to see entries)'
       : '尚無專注紀錄（完成一次計時後會顯示）';
@@ -49,6 +54,19 @@ class LocaleController extends ChangeNotifier {
   String get focusAutoComplete => isEnglish ? 'Auto (countdown ended)' : '自動完成（倒數結束）';
   String get focusManualEnd => isEnglish ? 'Manual end' : '手動結束';
   String get focusLoggedXp => isEnglish ? 'Session saved · +' : '已記錄專注 · +';
+  String get focusSessionLengthTitle =>
+      isEnglish ? 'Session length' : '專注時長';
+  String get focusSessionLengthSubtitle =>
+      isEnglish ? 'Tap edit to change (1–180 min)' : '撳編輯可改（1–180 分鐘）';
+  String get focusEditDurationTitle =>
+      isEnglish ? 'Edit session length' : '編輯專注時長';
+  String get focusEditDurationMinutesLabel =>
+      isEnglish ? 'Minutes' : '分鐘';
+  String get focusEditDurationSave => isEnglish ? 'Save' : '儲存';
+  String get focusEditDurationCancel => isEnglish ? 'Cancel' : '取消';
+  String get focusEditDurationInvalid => isEnglish
+      ? 'Enter a whole number from 1 to 180.'
+      : '請輸入 1 至 180 嘅整數。';
 
   // —— Settings ——
   String get settingsTitle => isEnglish ? 'Settings' : '設定';
@@ -162,4 +180,7 @@ class LocaleController extends ChangeNotifier {
           '唔錯',
           '好正！',
         ];
+  String get moodRecordSectionTitle => isEnglish ? 'Mood log' : 'Mood 紀錄';
+  String get moodNoRecordsYet => isEnglish ? 'No records yet' : '暫無紀錄';
+  String get moodReflectionEmpty => isEnglish ? '(No reflection)' : '（無 reflection）';
 }
