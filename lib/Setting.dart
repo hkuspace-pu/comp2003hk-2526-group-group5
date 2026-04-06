@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 
+import 'Gamification.dart';
 import 'state/app_data_provider.dart';
 import 'state/user_provider.dart';
 
@@ -210,20 +212,6 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: 'General',
-                options: [
-                  ListTile(
-                    leading: const Icon(Icons.language),
-                    title: const Text('Language'),
-                    trailing: const Icon(Icons.chevron_right),
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Language — placeholder')),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              SettingsGroup(
                 title: 'Account Settings',
                 options: [
                   ListTile(
@@ -278,6 +266,21 @@ class _SettingsPageState extends State<SettingsPage> {
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Apple Health / Google Fit 之後接')),
                     ),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.share),
+                    title: const Text('Share city'),
+                    subtitle: const Text('Share your progress as text'),
+                    onTap: () async {
+                      final gamification =
+                          Provider.of<GamificationData>(context, listen: false);
+                      await Share.share(
+                        'My Focus City — Level ${gamification.currentCurrentLevel}, '
+                        'Total XP: ${gamification.currentTotalXp}. '
+                        'Built with Focus Wellbeing!',
+                        subject: 'My Focus City',
+                      );
+                    },
                   ),
                 ],
               ),
