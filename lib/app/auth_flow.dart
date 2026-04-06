@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../Home.dart';
-import '../Login.dart';
-import '../Register.dart';
-import '../staff/staff_login_screen.dart';
-import '../staff/staff_welcome_screen.dart';
+import 'package:groupproject_group5/staff/staff_login_screen.dart';
+import 'package:groupproject_group5/staff/staff_welcome_screen.dart';
+import 'package:groupproject_group5/ui/home_screen.dart';
+import 'package:groupproject_group5/ui/login_screen.dart';
+import 'package:groupproject_group5/ui/register_screen.dart';
 
 enum _AuthPage { welcome, login, register, staffWelcome, staffLogin }
 
@@ -34,11 +33,9 @@ class _AuthFlowState extends State<AuthFlow> {
           onNavigateSignUp: () => setState(() => _page = _AuthPage.register),
         );
       case _AuthPage.register:
-        return ChangeNotifierProvider<SignUpData>(
-          create: (_) => SignUpData(),
-          child: SignUpScreen(
-            onBack: () => setState(() => _page = _AuthPage.welcome),
-          ),
+        return SignUpScreen(
+          onBack: () => setState(() => _page = _AuthPage.welcome),
+          onNavigateLogin: () => setState(() => _page = _AuthPage.login),
         );
       case _AuthPage.staffWelcome:
         return StaffWelcomeScreen(

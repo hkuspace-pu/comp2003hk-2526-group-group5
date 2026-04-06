@@ -1,18 +1,6 @@
 import 'package:flutter/material.dart';
 
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final ImageProvider? customerImage;
-
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.customerImage,
-  });
-}
+import '../models/user.dart';
 
 class UserProvider extends ChangeNotifier {
   User? _currentUser;
@@ -21,7 +9,6 @@ class UserProvider extends ChangeNotifier {
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
 
-  /// Demo login until Supabase is wired (Phase 2).
   Future<void> login(String email, String password) async {
     _isLoading = true;
     notifyListeners();

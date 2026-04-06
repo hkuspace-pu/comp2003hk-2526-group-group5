@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/app/app_routes.dart';
+import 'package:groupproject_group5/core/demo_login.dart';
+import 'package:groupproject_group5/l10n/locale_controller.dart';
+import 'package:groupproject_group5/state/user_provider.dart';
+import 'package:groupproject_group5/widgets/app_language_toggle.dart';
 import 'package:provider/provider.dart';
-
-import 'core/demo_login.dart';
-import 'l10n/locale_controller.dart';
-import 'state/user_provider.dart';
-import 'widgets/app_language_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -41,7 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     final String email = _emailController.text;
     final String password = _passwordController.text;
-    final userProvider = context.read<UserProvider>();
+    final UserProvider userProvider = context.read<UserProvider>();
     await userProvider.login(email, password);
     if (!mounted) return;
     if (userProvider.currentUser != null) {
@@ -67,9 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (widget.onNavigateSignUp != null) {
       widget.onNavigateSignUp!();
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Open sign up')),
-      );
+      Navigator.of(context).pushReplacementNamed(AppRoutes.register);
     }
   }
 
@@ -87,7 +85,12 @@ class _LoginScreenState extends State<LoginScreen> {
                 icon: const Icon(Icons.arrow_back),
                 onPressed: widget.onBack,
               )
-            : null,
+            : (Navigator.canPop(context)
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.maybePop(context),
+                  )
+                : null),
         actions: const [AppLanguageToggle()],
       ),
       body: SafeArea(

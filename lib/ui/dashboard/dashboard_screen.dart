@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../Gamification.dart';
-import '../../l10n/locale_controller.dart';
-import '../../state/app_data_provider.dart';
+import 'package:groupproject_group5/l10n/locale_controller.dart';
+import 'package:groupproject_group5/state/app_data_provider.dart';
+import 'package:groupproject_group5/state/city_gamification_state.dart' as city;
 
 /// Dashboard with sample stats and calendar markers.
 class DashboardScreen extends StatefulWidget {
@@ -59,7 +59,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          Consumer2<AppDataProvider, GamificationData>(
+          Consumer2<AppDataProvider, city.GamificationData>(
             builder: (context, data, game, _) {
               final n = data.sessions.length;
               final mockFocus = n * 12 + 18;

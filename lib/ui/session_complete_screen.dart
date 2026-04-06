@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class SessionCompleteScreen extends StatefulWidget {
-  const SessionCompleteScreen({super.key});
+  const SessionCompleteScreen({super.key, this.embedInMainShell = false});
+
+  /// When true, hides duplicate [BottomNavigationBar] (e.g. when shown as a pushed route).
+  final bool embedInMainShell;
 
   @override
   State<SessionCompleteScreen> createState() => _SessionCompleteScreenState();
@@ -36,10 +39,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
   }
 
   void _onBackPressed() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Back button pressed!')),
-    );
-    // In a real app, you might use Navigator.pop(context) or navigate to a previous screen.
+    Navigator.maybePop(context);
   }
 
   // Callback for BottomNavigationBar item taps
@@ -219,19 +219,22 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey[600],
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-      ),
+      bottomNavigationBar: widget.embedInMainShell
+          ? null
+          : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              selectedItemColor: Colors.green,
+              unselectedItemColor: Colors.grey[600],
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.area_chart), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+              ],
+            ),
     );
   }
 

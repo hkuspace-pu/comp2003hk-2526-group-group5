@@ -1,59 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'state/user_provider.dart';
-
-class SignUpData extends ChangeNotifier {
-  bool _privacyPolicyAccepted;
-  final TextEditingController userNameController;
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final TextEditingController confirmPasswordController;
-  bool _isPasswordVisible = false;
-  bool _isConfirmPasswordVisible = false;
-
-  SignUpData()
-      : _privacyPolicyAccepted = false,
-        userNameController = TextEditingController(),
-        emailController = TextEditingController(),
-        passwordController = TextEditingController(),
-        confirmPasswordController = TextEditingController();
-
-  bool get privacyPolicyAccepted => _privacyPolicyAccepted;
-  bool get isPasswordVisible => _isPasswordVisible;
-  bool get isConfirmPasswordVisible => _isConfirmPasswordVisible;
-
-  set privacyPolicyAccepted(bool value) {
-    if (_privacyPolicyAccepted != value) {
-      _privacyPolicyAccepted = value;
-      notifyListeners();
-    }
-  }
-
-  void togglePasswordVisibility() {
-    _isPasswordVisible = !_isPasswordVisible;
-    notifyListeners();
-  }
-
-  void toggleConfirmPasswordVisibility() {
-    _isConfirmPasswordVisible = !_isConfirmPasswordVisible;
-    notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    userNameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
-    super.dispose();
-  }
-}
+import 'package:groupproject_group5/app/app_routes.dart';
+import 'package:groupproject_group5/state/sign_up_data.dart';
+import 'package:groupproject_group5/state/user_provider.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({super.key, this.onBack});
+  const SignUpScreen({super.key, this.onBack, this.onNavigateLogin});
 
   final VoidCallback? onBack;
+  final VoidCallback? onNavigateLogin;
 
   void _handleSignUp(BuildContext context, SignUpData signUpData) {
     if (signUpData.privacyPolicyAccepted) {
@@ -72,13 +28,10 @@ class SignUpScreen extends StatelessWidget {
         return;
       }
 
-      // In a real application, this would involve sending data to a server
-      // or performing local authentication.
-      // For this example, we'll just print the data and show a snackbar.
       context.read<UserProvider>().registerLocalAccount(
-            name: userName,
-            email: email,
-          );
+        name: userName,
+        email: email.trim(),
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -100,14 +53,20 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
-      appBar: onBack != null
+      appBar: (onBack != null || Navigator.canPop(context))
           ? AppBar(
-              backgroundColor: Colors.transparent,
+              backgroundColor: const Color(0xFFF8F8EC),
               elevation: 0,
               foregroundColor: Colors.black87,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back),
-                onPressed: onBack,
+                onPressed: () {
+                  if (onBack != null) {
+                    onBack!();
+                  } else {
+                    Navigator.maybePop(context);
+                  }
+                },
               ),
             )
           : null,
@@ -365,9 +324,12 @@ class SignUpScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // In a real app, you would navigate to the LoginScreen
-                          print('Navigating to LoginScreen.');
-                          // Example: Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const LoginScreen()));
+                          if (onNavigateLogin != null) {
+                            onNavigateLogin!();
+                          } else {
+                            Navigator.of(context)
+                                .pushReplacementNamed(AppRoutes.login);
+                          }
                         },
                         child: const Text(
                           'Login',

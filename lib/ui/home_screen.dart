@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({
     super.key,
@@ -11,6 +13,22 @@ class HomeScreen extends StatelessWidget {
   final VoidCallback? onSignIn;
   final VoidCallback? onSignUp;
   final VoidCallback? onStaffPortal;
+
+  void _signIn(BuildContext context) {
+    if (onSignIn != null) {
+      onSignIn!();
+    } else {
+      Navigator.of(context).pushNamed(AppRoutes.login);
+    }
+  }
+
+  void _signUp(BuildContext context) {
+    if (onSignUp != null) {
+      onSignUp!();
+    } else {
+      Navigator.of(context).pushNamed(AppRoutes.register);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,7 +93,7 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: onSignIn,
+                    onPressed: () => _signIn(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF46AA57),
                       foregroundColor: Colors.white,
@@ -103,7 +121,7 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 56,
                   child: OutlinedButton(
-                    onPressed: onSignUp,
+                    onPressed: () => _signUp(context),
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF46AA57), width: 2),
                       foregroundColor: const Color(0xFF46AA57),
