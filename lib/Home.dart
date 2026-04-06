@@ -5,10 +5,12 @@ class HomeScreen extends StatelessWidget {
     super.key,
     this.onSignIn,
     this.onSignUp,
+    this.onStaffPortal,
   });
 
   final VoidCallback? onSignIn;
   final VoidCallback? onSignUp;
+  final VoidCallback? onStaffPortal;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +122,20 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
 
-              const Spacer(flex: 2),
+              const Spacer(flex: 1),
+              if (onStaffPortal != null)
+                TextButton(
+                  onPressed: onStaffPortal,
+                  child: Text(
+                    'Staff portal',
+                    style: TextStyle(
+                      color: Colors.grey.shade700,
+                      fontSize: 14,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 8),
             ],
           ),
         ),

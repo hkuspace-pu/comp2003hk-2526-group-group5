@@ -5,7 +5,9 @@ import 'package:provider/provider.dart';
 import '../Gamification.dart';
 import '../l10n/locale_controller.dart';
 import '../state/app_data_provider.dart';
+import '../state/staff_provider.dart';
 import '../state/user_provider.dart';
+import '../staff/staff_main_shell.dart';
 import 'auth_flow.dart';
 import 'main_shell.dart';
 
@@ -28,6 +30,7 @@ class FocusWellbeingApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LocaleController()),
+        ChangeNotifierProvider(create: (_) => StaffProvider()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AppDataProvider()..init()),
         ChangeNotifierProvider(create: (_) => GamificationData()),
@@ -69,8 +72,11 @@ class _RootGate extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<UserProvider>(
-      builder: (context, userProvider, _) {
+    return Consumer2<StaffProvider, UserProvider>(
+      builder: (context, staff, userProvider, _) {
+        if (staff.currentStaff != null) {
+          return const StaffMainShell();
+        }
         if (userProvider.currentUser == null) {
           return const AuthFlow();
         }
