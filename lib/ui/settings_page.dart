@@ -1,97 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'dart:async'; // Required for Future.delayed
 
-class User {
-  final String id;
-  final String name;
-  final String email;
-  final ImageProvider? customerImage;
+import 'package:groupproject_group5/models/user.dart';
+import 'package:groupproject_group5/state/user_provider.dart';
 
-  User({
-    required this.id,
-    required this.name,
-    required this.email,
-    this.customerImage,
-  });
-}
-
-class UserProvider extends ChangeNotifier {
-  User? _currentUser;
-  bool _isLoading = false;
-
-  UserProvider() {
-    // Initialize with a demo user
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: 'jeremy.lee@example.com',
-      customerImage: const AssetImage('images/profile.png'),
-    );
-  }
-
-  /// Currently logged‑in user
-  User? get currentUser => _currentUser;
-
-  /// Whether an async operation is running
-  bool get isLoading => _isLoading;
-
-  /// Simulated login
-  Future<void> login(String email, String password) async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 2));
-    _currentUser = User(
-      id: 'user123',
-      name: 'Jeremy Lee',
-      email: email,
-      customerImage: const AssetImage('images/profile.png'),
-    );
-
-    _isLoading = false;
-    notifyListeners();
-  }
-
-  /// Simulated logout
-  Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
-
-    await Future.delayed(const Duration(seconds: 1));
-    _currentUser = null;
-
-    _isLoading = false;
-    notifyListeners();
-  }
-}
-
-void main() => runApp(const MyApp());
-
-/// Root widget
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Settings App',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const SettingsPage(),
-      ),
-    );
-  }
-}
 class SettingsGroupTitle extends StatelessWidget {
   final String title;
   const SettingsGroupTitle({super.key, required this.title});

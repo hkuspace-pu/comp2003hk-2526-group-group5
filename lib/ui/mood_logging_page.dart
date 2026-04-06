@@ -1,22 +1,5 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MoodLoggingApp());
-}
-
-class MoodLoggingApp extends StatelessWidget {
-  const MoodLoggingApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mood Logging',
-      debugShowCheckedModeBanner: false,
-      home: const MoodLoggingPage(),
-    );
-  }
-}
-
 class MoodLoggingPage extends StatefulWidget {
   const MoodLoggingPage({super.key});
 
