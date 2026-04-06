@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
+
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -33,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Logging in with $email...')),
     );
+    Navigator.of(context).pushReplacementNamed(AppRoutes.shell);
   }
 
   void _handleForgotPassword() {
@@ -50,16 +53,24 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void _handleSignUp() {
-    debugPrint('Sign Up pressed');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Navigating to sign up screen...')),
-    );
+    Navigator.of(context).pushReplacementNamed(AppRoutes.register);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
+      appBar: Navigator.canPop(context)
+          ? AppBar(
+              backgroundColor: const Color(0xFFF8F8EC),
+              elevation: 0,
+              foregroundColor: Colors.black87,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.maybePop(context),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
 import 'package:groupproject_group5/models/user.dart';
 import 'package:groupproject_group5/state/user_provider.dart';
 
@@ -87,7 +88,10 @@ class SettingsGroup extends StatelessWidget {
 
 /// Main settings page.
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.embedInMainShell = false});
+
+  /// When true, used inside [MainShell] — hides duplicate bottom bar and back affordance.
+  final bool embedInMainShell;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -112,10 +116,13 @@ class _SettingsPageState extends State<SettingsPage> {
         backgroundColor: appBarColor,
         title: const Text('Settings', style: TextStyle(color: Colors.white)),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        automaticallyImplyLeading: !widget.embedInMainShell,
+        leading: widget.embedInMainShell
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.maybePop(context),
+              ),
       ),
       body: Consumer<UserProvider>(
         builder: (context, userProvider, _) {
@@ -147,15 +154,20 @@ class _SettingsPageState extends State<SettingsPage> {
               UserProfileTile(
                 user: user,
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User profile tapped')),
-                  );
+                  Navigator.of(context).pushNamed(AppRoutes.profile);
                 },
               ),
               const SizedBox(height: 16),
               SettingsGroup(
                 title: 'General Settings',
                 options: [
+                  ListTile(
+                    leading: const Icon(Icons.timer_outlined),
+                    title: const Text('Session activity'),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () =>
+                        Navigator.of(context).pushNamed(AppRoutes.session),
+                  ),
                   ListTile(
                     leading: const Icon(Icons.notifications),
                     title: const Text('Notifications'),
@@ -253,21 +265,24 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: appBarColor,
-        unselectedItemColor: Colors.grey.shade700,
-        onTap: _onItemTapped,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-      ),
+      bottomNavigationBar: widget.embedInMainShell
+          ? null
+          : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              items: const [
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.area_chart), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+              ],
+              currentIndex: _selectedIndex,
+              selectedItemColor: appBarColor,
+              unselectedItemColor: Colors.grey.shade700,
+              onTap: _onItemTapped,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+            ),
     );
   }
 }

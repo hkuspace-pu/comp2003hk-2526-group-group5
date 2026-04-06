@@ -5,7 +5,10 @@ import 'package:groupproject_group5/state/profile_auth_data.dart';
 import 'package:groupproject_group5/state/profile_gamification_data.dart';
 
 class UserProfileScreen extends StatefulWidget {
-  const UserProfileScreen({super.key});
+  const UserProfileScreen({super.key, this.embedInMainShell = false});
+
+  /// When true, hides duplicate [BottomNavigationBar].
+  final bool embedInMainShell;
 
   @override
   State<UserProfileScreen> createState() => _UserProfileScreenState();
@@ -32,9 +35,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
               backgroundColor: appBarColor,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Root screen')),
-                ),
+                onPressed: () => Navigator.maybePop(context),
               ),
               title: const Text('Account', style: TextStyle(color: Colors.white)),
               centerTitle: true,
@@ -146,21 +147,25 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                 const SizedBox(height: 80),
               ],
             ),
-            bottomNavigationBar: BottomNavigationBar(
-              type: BottomNavigationBarType.fixed,
-              items: const <BottomNavigationBarItem>[
-                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-              ],
-              currentIndex: _selectedIndex,
-              selectedItemColor: appBarColor,
-              unselectedItemColor: Colors.grey.shade700,
-              onTap: _onItemTapped,
-              showSelectedLabels: false,
-              showUnselectedLabels: false,
-            ),
+            bottomNavigationBar: widget.embedInMainShell
+                ? null
+                : BottomNavigationBar(
+                    type: BottomNavigationBarType.fixed,
+                    items: const <BottomNavigationBarItem>[
+                      BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                      BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                      BottomNavigationBarItem(
+                          icon: Icon(Icons.area_chart), label: ''),
+                      BottomNavigationBarItem(
+                          icon: Icon(Icons.settings), label: ''),
+                    ],
+                    currentIndex: _selectedIndex,
+                    selectedItemColor: appBarColor,
+                    unselectedItemColor: Colors.grey.shade700,
+                    onTap: _onItemTapped,
+                    showSelectedLabels: false,
+                    showUnselectedLabels: false,
+                  ),
           ),
     );
   }

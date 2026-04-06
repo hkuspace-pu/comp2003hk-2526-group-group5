@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 
 class MoodLoggingPage extends StatefulWidget {
-  const MoodLoggingPage({super.key});
+  const MoodLoggingPage({super.key, this.embedInMainShell = false});
+
+  /// When true, used inside [MainShell] — hides duplicate bottom bar and back affordance.
+  final bool embedInMainShell;
 
   @override
   State<MoodLoggingPage> createState() => _MoodLoggingPageState();
@@ -48,10 +51,13 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
       appBar: AppBar(
         backgroundColor: const Color(0xFF46AA57),
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {},
-        ),
+        automaticallyImplyLeading: !widget.embedInMainShell,
+        leading: widget.embedInMainShell
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.maybePop(context),
+              ),
         centerTitle: true,
         title: const Text(
           "Mood Logging",
@@ -182,19 +188,22 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.grey[600],
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
-        ],
-      ),
+      bottomNavigationBar: widget.embedInMainShell
+          ? null
+          : BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+              selectedItemColor: Colors.green,
+              unselectedItemColor: Colors.grey[600],
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
+                BottomNavigationBarItem(
+                    icon: Icon(Icons.area_chart), label: ''),
+                BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+              ],
+            ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
 import 'package:groupproject_group5/state/sign_up_data.dart';
 
 class SignUpScreen extends StatelessWidget {
@@ -51,6 +52,17 @@ class SignUpScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
+      appBar: Navigator.canPop(context)
+          ? AppBar(
+              backgroundColor: const Color(0xFFF8F8EC),
+              elevation: 0,
+              foregroundColor: Colors.black87,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () => Navigator.maybePop(context),
+              ),
+            )
+          : null,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -305,9 +317,8 @@ class SignUpScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // In a real app, you would navigate to the LoginScreen
-                          print('Navigating to LoginScreen.');
-                          // Example: Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const LoginScreen()));
+                          Navigator.of(context)
+                              .pushReplacementNamed(AppRoutes.login);
                         },
                         child: const Text(
                           'Login',

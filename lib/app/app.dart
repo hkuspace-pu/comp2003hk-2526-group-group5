@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
 import 'package:groupproject_group5/core/app_theme.dart';
 import 'package:groupproject_group5/state/city_gamification_state.dart' as city;
 import 'package:groupproject_group5/state/profile_auth_data.dart';
@@ -8,6 +9,10 @@ import 'package:groupproject_group5/state/profile_gamification_data.dart' as pro
 import 'package:groupproject_group5/state/sign_up_data.dart';
 import 'package:groupproject_group5/state/user_provider.dart';
 import 'package:groupproject_group5/ui/login_screen.dart';
+import 'package:groupproject_group5/ui/main_shell.dart';
+import 'package:groupproject_group5/ui/register_screen.dart';
+import 'package:groupproject_group5/ui/session_complete_screen.dart';
+import 'package:groupproject_group5/ui/user_profile_screen.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -37,7 +42,16 @@ class MyApp extends StatelessWidget {
         title: 'Focus App',
         debugShowCheckedModeBanner: false,
         theme: buildAppTheme(),
-        home: const LoginScreen(),
+        initialRoute: AppRoutes.shell,
+        routes: <String, WidgetBuilder>{
+          AppRoutes.shell: (_) => const MainShell(),
+          AppRoutes.login: (_) => const LoginScreen(),
+          AppRoutes.register: (_) => const SignUpScreen(),
+          AppRoutes.profile: (_) =>
+              const UserProfileScreen(embedInMainShell: true),
+          AppRoutes.session: (_) =>
+              const SessionCompleteScreen(embedInMainShell: true),
+        },
       ),
     );
   }

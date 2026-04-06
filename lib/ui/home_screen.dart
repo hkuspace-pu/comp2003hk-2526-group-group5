@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:groupproject_group5/app/app_routes.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -67,7 +69,7 @@ class HomeScreen extends StatelessWidget {
                   height: 56,
                   child: ElevatedButton(
                     onPressed: () {
-                      // Navigate to login - functionality can be added later
+                      Navigator.of(context).pushNamed(AppRoutes.login);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF46AA57),
@@ -97,7 +99,7 @@ class HomeScreen extends StatelessWidget {
                   height: 56,
                   child: OutlinedButton(
                     onPressed: () {
-                      // Navigate to sign up - functionality can be added later
+                      Navigator.of(context).pushNamed(AppRoutes.register);
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF46AA57), width: 2),
