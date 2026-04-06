@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../l10n/locale_controller.dart';
 import '../../models/activity_entry.dart';
 import '../../state/app_data_provider.dart';
 
@@ -29,38 +30,39 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
   @override
   Widget build(BuildContext context) {
     const accent = Color(0xFF46AA57);
+    final tr = context.watch<LocaleController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
       appBar: AppBar(
         backgroundColor: accent,
         automaticallyImplyLeading: false,
-        title: const Text('Activity 紀錄', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: Text(tr.activityTitle, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          const Text('類型', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(tr.activityType, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextField(
             controller: _type,
-            decoration: _dec('例如 Study / Exercise'),
+            decoration: _dec(tr.activityTypeHint),
           ),
           const SizedBox(height: 16),
-          const Text('內容', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(tr.activityContent, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextField(
             controller: _desc,
             maxLines: 3,
-            decoration: _dec('做了啲乜…'),
+            decoration: _dec(tr.activityContentHint),
           ),
           const SizedBox(height: 16),
-          const Text('媒體連結（可選）', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(tr.activityMediaUrl, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextField(
             controller: _url,
-            decoration: _dec('圖片／影片 URL'),
+            decoration: _dec(tr.activityMediaUrlHint),
           ),
           const SizedBox(height: 24),
           FilledButton(
@@ -79,7 +81,7 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
               );
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('已儲存')),
+                  SnackBar(content: Text(tr.activitySaved)),
                 );
                 _desc.clear();
                 _url.clear();
@@ -89,16 +91,16 @@ class _ActivityDemoScreenState extends State<ActivityDemoScreen> {
               backgroundColor: accent,
               minimumSize: const Size.fromHeight(48),
             ),
-            child: const Text('提交'),
+            child: Text(tr.activitySubmit),
           ),
           const SizedBox(height: 28),
-          const Text('最近紀錄', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+          Text(tr.activityRecent, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           const SizedBox(height: 8),
           Consumer<AppDataProvider>(
             builder: (context, data, _) {
               final list = data.activities.take(8).toList();
               if (list.isEmpty) {
-                return Text('暫無', style: TextStyle(color: Colors.grey.shade600));
+                return Text(tr.activityNone, style: TextStyle(color: Colors.grey.shade600));
               }
               return Column(
                 children: list

@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 import 'Gamification.dart';
+import 'l10n/locale_controller.dart';
 import 'state/app_data_provider.dart';
 import 'state/user_provider.dart';
 
@@ -106,12 +107,17 @@ class _SettingsPageState extends State<SettingsPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: appBarColor,
-        title: const Text('Settings', style: TextStyle(color: Colors.white)),
+        title: Consumer<LocaleController>(
+          builder: (context, tr, _) => Text(
+            tr.settingsTitle,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
         centerTitle: true,
         automaticallyImplyLeading: false,
       ),
-      body: Consumer<UserProvider>(
-        builder: (context, userProvider, _) {
+      body: Consumer2<UserProvider, LocaleController>(
+        builder: (context, userProvider, tr, _) {
           if (userProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
@@ -122,12 +128,12 @@ class _SettingsPageState extends State<SettingsPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('No user logged in'),
+                  Text(tr.settingsNoUser),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () =>
                         userProvider.login('test@example.com', 'password'),
-                    child: const Text('Log In (Demo)'),
+                    child: Text(tr.settingsDemoLogin),
                   ),
                 ],
               ),
@@ -141,31 +147,31 @@ class _SettingsPageState extends State<SettingsPage> {
                 user: user,
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('User profile tapped')),
+                    SnackBar(content: Text(tr.settingsUserProfileTap)),
                   );
                 },
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: '提醒',
+                title: tr.settingsReminders,
                 options: [
                   SwitchListTile(
                     secondary: const Icon(Icons.play_circle_outline),
-                    title: const Text('專注開始提醒'),
-                    subtitle: const Text('之後可接本地通知'),
+                    title: Text(tr.settingsFocusStartReminder),
+                    subtitle: Text(tr.settingsFocusStartReminderSub),
                     value: _notifDemo,
                     activeThumbColor: appBarColor,
                     onChanged: (v) {
                       setState(() => _notifDemo = v);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(v ? '已開啟' : '已關閉')),
+                        SnackBar(content: Text(v ? tr.settingsOn : tr.settingsOff)),
                       );
                     },
                   ),
                   SwitchListTile(
                     secondary: const Icon(Icons.coffee_outlined),
-                    title: const Text('休息提醒'),
-                    subtitle: const Text('本地提醒占位'),
+                    title: Text(tr.settingsBreakReminder),
+                    subtitle: Text(tr.settingsBreakReminderSub),
                     value: _breakDemo,
                     activeThumbColor: appBarColor,
                     onChanged: (v) => setState(() => _breakDemo = v),
@@ -176,7 +182,7 @@ class _SettingsPageState extends State<SettingsPage> {
               Consumer<AppDataProvider>(
                 builder: (context, appData, _) {
                   return SettingsGroup(
-                    title: 'Profile',
+                    title: tr.settingsProfile,
                     options: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -196,12 +202,12 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                       ListTile(
                         leading: const Icon(Icons.person_add_alt_1),
-                        title: const Text('新增 profile'),
+                        title: Text(tr.settingsAddProfile),
                         onTap: () async {
                           await appData.addProfile('Profile ${appData.profiles.length + 1}');
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('已新增 profile')),
+                              SnackBar(content: Text(tr.settingsProfileAdded)),
                             );
                           }
                         },
@@ -212,96 +218,123 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: 'Account Settings',
+                title: tr.settingsAccount,
                 options: [
                   ListTile(
                     leading: const Icon(Icons.privacy_tip),
-                    title: const Text('Privacy'),
+                    title: Text(tr.settingsPrivacy),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Privacy settings')),
+                      SnackBar(content: Text(tr.settingsPrivacySnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.security),
-                    title: const Text('Security'),
+                    title: Text(tr.settingsSecurity),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Security settings')),
+                      SnackBar(content: Text(tr.settingsSecuritySnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.lock),
-                    title: const Text('Change Password'),
+                    title: Text(tr.settingsChangePassword),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Change password')),
+                      SnackBar(content: Text(tr.settingsPasswordSnack)),
                     ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: '資料',
+                title: tr.settingsData,
                 options: [
                   ListTile(
                     leading: const Icon(Icons.upload_file),
-                    title: const Text('匯出 TSV'),
-                    subtitle: const Text('之後接真檔案'),
+                    title: Text(tr.settingsExportTsv),
+                    subtitle: Text(tr.settingsExportTsvSub),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('匯出 — 功能稍後接')),
+                      SnackBar(content: Text(tr.settingsExportSnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.download),
-                    title: const Text('匯入 TSV'),
+                    title: Text(tr.settingsImportTsv),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('匯入 — 功能稍後接')),
+                      SnackBar(content: Text(tr.settingsImportSnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.favorite_outline),
-                    title: const Text('Health（mock）'),
-                    subtitle: const Text('預覽：今日步數 6234'),
+                    title: Text(tr.settingsHealthMock),
+                    subtitle: Text(tr.settingsHealthMockSub),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Apple Health / Google Fit 之後接')),
+                      SnackBar(content: Text(tr.settingsHealthSnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.share),
-                    title: const Text('Share city'),
-                    subtitle: const Text('Share your progress as text'),
+                    title: Text(tr.settingsShareCity),
+                    subtitle: Text(tr.settingsShareCitySub),
                     onTap: () async {
                       final gamification =
                           Provider.of<GamificationData>(context, listen: false);
                       await Share.share(
-                        'My Focus City — Level ${gamification.currentCurrentLevel}, '
-                        'Total XP: ${gamification.currentTotalXp}. '
-                        'Built with Focus Wellbeing!',
-                        subject: 'My Focus City',
+                        tr.shareCityMessage(
+                          gamification.currentCurrentLevel,
+                          gamification.currentTotalXp,
+                        ),
+                        subject: tr.focusCityTitle,
                       );
                     },
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(tr.settingsLanguage, style: const TextStyle(fontWeight: FontWeight.w600)),
+                        const SizedBox(height: 8),
+                        SegmentedButton<AppLanguage>(
+                          segments: [
+                            ButtonSegment<AppLanguage>(
+                              value: AppLanguage.english,
+                              label: Text(tr.settingsLanguageEnglish),
+                            ),
+                            ButtonSegment<AppLanguage>(
+                              value: AppLanguage.cantonese,
+                              label: Text(tr.settingsLanguageCantonese),
+                            ),
+                          ],
+                          selected: {tr.language},
+                          onSelectionChanged: (Set<AppLanguage> selection) {
+                            context.read<LocaleController>().setLanguage(selection.first);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
               SettingsGroup(
-                title: 'About App',
+                title: tr.settingsAbout,
                 options: [
                   ListTile(
                     leading: const Icon(Icons.info),
-                    title: const Text('Version'),
+                    title: Text(tr.settingsVersion),
                     trailing: const Text('1.0.0'),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('App version info')),
+                      SnackBar(content: Text(tr.settingsVersionSnack)),
                     ),
                   ),
                   ListTile(
                     leading: const Icon(Icons.help),
-                    title: const Text('Help & Support'),
+                    title: Text(tr.settingsHelp),
                     trailing: const Icon(Icons.chevron_right),
                     onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Help & Support')),
+                      SnackBar(content: Text(tr.settingsHelpSnack)),
                     ),
                   ),
                 ],
@@ -321,10 +354,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   onPressed: userProvider.isLoading
                       ? null
                       : () => userProvider.logout(),
-                  child: const Text(
-                    'Log Out',
+                  child: Text(
+                    tr.settingsLogout,
                     style:
-                    TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),

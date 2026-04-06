@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../Gamification.dart';
+import '../l10n/locale_controller.dart';
 import '../Mood_Logging.dart';
 import '../Setting.dart';
 import '../ui/activity/activity_demo_screen.dart';
@@ -20,6 +22,7 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.watch<LocaleController>();
     return Scaffold(
       body: IndexedStack(
         index: _index,
@@ -37,12 +40,12 @@ class _MainShellState extends State<MainShell> {
         selectedItemColor: _accent,
         unselectedItemColor: Colors.grey.shade600,
         onTap: (i) => setState(() => _index = i),
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.park), label: 'Focus'),
-          BottomNavigationBarItem(icon: Icon(Icons.mood), label: 'Mood'),
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.list_alt), label: 'Activity'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.park), label: tr.navFocus),
+          BottomNavigationBarItem(icon: const Icon(Icons.mood), label: tr.navMood),
+          BottomNavigationBarItem(icon: const Icon(Icons.dashboard), label: tr.navDashboard),
+          BottomNavigationBarItem(icon: const Icon(Icons.list_alt), label: tr.navActivity),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings), label: tr.navSettings),
         ],
       ),
     );

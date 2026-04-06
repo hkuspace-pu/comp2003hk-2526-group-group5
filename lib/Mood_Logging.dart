@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
+import 'l10n/locale_controller.dart';
 import 'models/mood_entry.dart';
 import 'state/app_data_provider.dart';
 
@@ -32,14 +33,6 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
     Colors.green,
   ];
 
-  final List<String> moodTexts = [
-    'I feel very sad!',
-    'I feel a bit down!',
-    'I feel normal!',
-    'I feel good!',
-    'I feel great!',
-  ];
-
   @override
   void dispose() {
     _reflection.dispose();
@@ -48,6 +41,8 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.watch<LocaleController>();
+    final moodTexts = tr.moodLabels;
     return Scaffold(
       backgroundColor: const Color(0xFFFDF9F6),
       appBar: AppBar(
@@ -55,9 +50,9 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
         elevation: 0,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Text(
-          'Mood Logging',
-          style: TextStyle(
+        title: Text(
+          tr.moodTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),
@@ -66,9 +61,9 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
       body: ListView(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
         children: [
-          const Text(
-            'How is your mood today?',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Text(
+            tr.moodHowToday,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           Center(
@@ -102,13 +97,13 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
             }),
           ),
           const SizedBox(height: 24),
-          const Text('Reflection', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(tr.moodReflection, style: const TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 8),
           TextField(
             controller: _reflection,
             maxLines: 3,
             decoration: InputDecoration(
-              hintText: '寫幾句今日感受…',
+              hintText: tr.moodReflectionHint,
               filled: true,
               fillColor: Colors.white,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -132,7 +127,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
                 );
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('已記錄：${moodTexts[selectedMood]}')),
+                    SnackBar(content: Text('${tr.moodSaved} ${moodTexts[selectedMood]}')),
                   );
                 }
               },

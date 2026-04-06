@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
+import 'l10n/locale_controller.dart';
 import 'models/focus_session_record.dart';
 import 'state/app_data_provider.dart';
 
@@ -443,6 +444,7 @@ class FocusCityPage extends StatelessWidget {
   const FocusCityPage({super.key});
 
   void _showHistory(BuildContext context) {
+    final tr = context.read<LocaleController>();
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
@@ -451,9 +453,9 @@ class FocusCityPage extends StatelessWidget {
           builder: (context, data, _) {
             final list = data.sessions;
             if (list.isEmpty) {
-              return const Padding(
-                padding: EdgeInsets.all(24),
-                child: Text('尚無專注紀錄（完成一次計時後會顯示）'),
+              return Padding(
+                padding: const EdgeInsets.all(24),
+                child: Text(tr.focusNoSessionsYet),
               );
             }
             return ListView.separated(
@@ -463,11 +465,14 @@ class FocusCityPage extends StatelessWidget {
               itemBuilder: (context, i) {
                 final s = list[i];
                 final m = s.durationSeconds ~/ 60;
+                final trh = context.watch<LocaleController>();
                 return ListTile(
                   leading: const Icon(Icons.timer_outlined),
-                  title: Text('$m 分鐘 · +${s.xpEarned} XP'),
+                  title: Text(
+                    '${trh.isEnglish ? '$m min' : '$m 分鐘'} · +${s.xpEarned} XP',
+                  ),
                   subtitle: Text(
-                    s.autoCompleted ? '自動完成（倒數結束）' : '手動結束',
+                    s.autoCompleted ? trh.focusAutoComplete : trh.focusManualEnd,
                   ),
                 );
               },
@@ -480,6 +485,7 @@ class FocusCityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.watch<LocaleController>();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -487,7 +493,7 @@ class FocusCityPage extends StatelessWidget {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          'Focus City',
+          tr.focusCityTitle,
           style: GoogleFonts.fredoka(
             color: Colors.white,
             fontWeight: FontWeight.w600,
@@ -497,7 +503,7 @@ class FocusCityPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.history, color: Colors.white),
-            tooltip: 'Session 紀錄',
+            tooltip: tr.focusSessionHistory,
             onPressed: () => _showHistory(context),
           ),
         ],
@@ -509,30 +515,33 @@ class FocusCityPage extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Consumer<GamificationData>(
               builder: (context, gamificationData, _) => Text(
-                "TODAY'S CITY (Lv: ${gamificationData.currentCurrentLevel}, XP: ${gamificationData.currentTotalXp})",
+                '${tr.focusTodaysCity} (Lv: ${gamificationData.currentCurrentLevel}, XP: ${gamificationData.currentTotalXp})',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Build your city with focus sessions', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              tr.focusBuildCityTagline,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: Consumer<FocusSessionData>(
               builder: (context, focusData, _) {
                 return SegmentedButton<FocusTimerKind>(
-                  segments: const [
+                  segments: [
                     ButtonSegment(
                       value: FocusTimerKind.countdown,
-                      label: Text('倒數（自動記錄）'),
-                      icon: Icon(Icons.hourglass_top, size: 18),
+                      label: Text(tr.focusTimerCountdown),
+                      icon: const Icon(Icons.hourglass_top, size: 18),
                     ),
                     ButtonSegment(
                       value: FocusTimerKind.stopwatch,
-                      label: Text('碼表（手動停止）'),
-                      icon: Icon(Icons.timer, size: 18),
+                      label: Text(tr.focusTimerStopwatch),
+                      icon: const Icon(Icons.timer, size: 18),
                     ),
                   ],
                   selected: {focusData.currentTimerKind},
@@ -582,10 +591,10 @@ class FocusCityPage extends StatelessWidget {
                         ),
                         child: Text(
                           focusData.currentIsRunning
-                              ? 'Pause'
+                              ? tr.focusPause
                               : focusData.currentIsPaused
-                                  ? 'Resume'
-                                  : 'Start',
+                                  ? tr.focusResume
+                                  : tr.focusStart,
                           style: gameText,
                         ),
                       ),
@@ -605,7 +614,7 @@ class FocusCityPage extends StatelessWidget {
                             side: const BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
-                        child: Text('Finish', style: gameText),
+                        child: Text(tr.focusFinish, style: gameText),
                       ),
                     ),
                   ],
@@ -614,11 +623,11 @@ class FocusCityPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
-              '從下方拖曳已解鎖嘅 Tree／Park 等到綠色區域，組裝你嘅城市',
-              style: TextStyle(fontSize: 12, color: Colors.black54, height: 1.3),
+              tr.focusDragHint,
+              style: const TextStyle(fontSize: 12, color: Colors.black54, height: 1.3),
             ),
           ),
           const SizedBox(height: 6),
@@ -633,7 +642,7 @@ class FocusCityPage extends StatelessWidget {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
-                          '已記錄專注 · +${focusData.lastXpAwarded} XP',
+                          '${context.read<LocaleController>().focusLoggedXp}${focusData.lastXpAwarded} XP',
                         ),
                       ),
                     );

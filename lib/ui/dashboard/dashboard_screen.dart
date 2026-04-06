@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../Gamification.dart';
+import '../../l10n/locale_controller.dart';
 import '../../state/app_data_provider.dart';
 
 /// Dashboard with sample stats and calendar markers.
@@ -18,6 +19,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     const accent = Color(0xFF46AA57);
+    final tr = context.watch<LocaleController>();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F7F4),
@@ -26,9 +28,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
         automaticallyImplyLeading: false,
         centerTitle: true,
-        title: const Text(
-          'Dashboard',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        title: Text(
+          tr.dashTitle,
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),
       body: ListView(
@@ -41,18 +43,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
             selectedColor: Colors.white,
             fillColor: accent,
             color: accent,
-            children: const [
+            children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('今日'),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(tr.dashToday),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('本週'),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(tr.dashWeek),
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text('本月'),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(tr.dashMonth),
               ),
             ],
           ),
@@ -66,23 +68,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   _StatCard(
                     icon: Icons.self_improvement,
-                    title: '專注時間（預覽）',
-                    value: '$mockFocus 分鐘',
-                    subtitle: '已存 ${data.sessions.length} 筆 session',
+                    title: tr.dashFocusPreview,
+                    value: '$mockFocus ${tr.dashMinutes}',
+                    subtitle: '${data.sessions.length} ${tr.dashSessionsStored}',
                     color: accent,
                   ),
                   const SizedBox(height: 12),
                   _StatCard(
                     icon: Icons.mood,
-                    title: '最近心情（預覽）',
+                    title: tr.dashMoodPreview,
                     value: mockMood,
-                    subtitle: '${data.moods.length} 筆 mood 紀錄',
+                    subtitle: '${data.moods.length} ${tr.dashMoodRecords}',
                     color: Colors.teal,
                   ),
                   const SizedBox(height: 12),
                   _StatCard(
                     icon: Icons.military_tech,
-                    title: '遊戲化進度',
+                    title: tr.dashGamification,
                     value: 'Lv ${game.currentCurrentLevel}',
                     subtitle: 'XP ${game.currentTotalXp}',
                     color: Colors.deepOrange,
@@ -92,9 +94,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           ),
           const SizedBox(height: 24),
-          const Text(
-            '日曆（有紀錄的日子會有綠點）',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          Text(
+            tr.dashCalendarHint,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           const SizedBox(height: 8),
           Consumer<AppDataProvider>(
@@ -103,6 +105,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               return _MiniCalendarStrip(
                 month: DateTime(now.year, now.month),
                 hasLog: data.hasLogsOn,
+                weekdayLabels: tr.calendarWeekdayLabels,
+                monthTitle: tr.calendarMonthTitle(now.year, now.month),
               );
             },
           ),
@@ -163,10 +167,14 @@ class _MiniCalendarStrip extends StatelessWidget {
   const _MiniCalendarStrip({
     required this.month,
     required this.hasLog,
+    required this.weekdayLabels,
+    required this.monthTitle,
   });
 
   final DateTime month;
   final bool Function(DateTime day) hasLog;
+  final List<String> weekdayLabels;
+  final String monthTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -181,20 +189,15 @@ class _MiniCalendarStrip extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '${month.year} 年 ${month.month} 月',
+              monthTitle,
               style: const TextStyle(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Text('日', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('一', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('二', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('三', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('四', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('五', style: TextStyle(fontSize: 11, color: Colors.grey)),
-                Text('六', style: TextStyle(fontSize: 11, color: Colors.grey)),
+                for (final w in weekdayLabels)
+                  Text(w, style: const TextStyle(fontSize: 11, color: Colors.grey)),
               ],
             ),
             GridView.builder(

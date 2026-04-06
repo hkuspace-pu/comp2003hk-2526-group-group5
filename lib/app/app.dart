@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../Gamification.dart';
+import '../l10n/locale_controller.dart';
 import '../state/app_data_provider.dart';
 import '../state/user_provider.dart';
 import 'auth_flow.dart';
@@ -25,6 +27,7 @@ class FocusWellbeingApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LocaleController()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => AppDataProvider()..init()),
         ChangeNotifierProvider(create: (_) => GamificationData()),
@@ -37,11 +40,25 @@ class FocusWellbeingApp extends StatelessWidget {
           },
         ),
       ],
-      child: MaterialApp(
-        title: 'Focus Wellbeing',
-        theme: buildTheme(),
-        debugShowCheckedModeBanner: false,
-        home: const _RootGate(),
+      child: Consumer<LocaleController>(
+        builder: (context, locale, _) {
+          return MaterialApp(
+            title: 'Focus Wellbeing',
+            theme: buildTheme(),
+            debugShowCheckedModeBanner: false,
+            locale: locale.locale,
+            supportedLocales: const [
+              Locale('en'),
+              Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant', countryCode: 'HK'),
+            ],
+            localizationsDelegates: const [
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: const _RootGate(),
+          );
+        },
       ),
     );
   }
