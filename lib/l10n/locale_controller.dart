@@ -27,6 +27,16 @@ class LocaleController extends ChangeNotifier {
   String get navActivity => isEnglish ? 'Activity' : '活動';
   String get navSettings => isEnglish ? 'Settings' : '設定';
 
+  // —— Auth / Login ——
+  String get loginDemoAccountTitle => isEnglish ? 'Demo account' : '測試帳號';
+  String get loginDemoAccountNote => isEnglish
+      ? 'You can also enter any email and password — demo mode will sign you in.'
+      : '亦可以隨意輸入其他 Email／Password（demo 模式會登入）。';
+  String get loginFillDemo => isEnglish ? 'Fill demo' : '一鍵填入';
+  String loginDemoCredentialLines(String email, String password) => isEnglish
+      ? 'Email: $email\nPassword: $password'
+      : 'Email：$email\nPassword：$password';
+
   // —— Focus / Gamification ——
   String get focusCityTitle => isEnglish ? 'Focus City' : '專注城市';
   String get focusSessionHistory => isEnglish ? 'Session history' : 'Session 紀錄';
@@ -186,7 +196,9 @@ class LocaleController extends ChangeNotifier {
           '唔錯',
           '好正！',
         ];
-  String get moodRecordSectionTitle => isEnglish ? 'Mood log' : 'Mood 紀錄';
+  String get moodRecordSectionTitle =>
+      isEnglish ? 'Mood log' : '心情紀錄';
   String get moodNoRecordsYet => isEnglish ? 'No records yet' : '暫無紀錄';
-  String get moodReflectionEmpty => isEnglish ? '(No reflection)' : '（無 reflection）';
+  String get moodReflectionEmpty =>
+      isEnglish ? '(No reflection)' : '（無感想）';
 }

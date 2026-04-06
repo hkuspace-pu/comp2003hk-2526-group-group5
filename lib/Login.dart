@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/demo_login.dart';
+import 'l10n/locale_controller.dart';
 import 'state/user_provider.dart';
+import 'widgets/app_language_toggle.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
@@ -73,19 +75,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final tr = context.watch<LocaleController>();
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
-      appBar: widget.onBack != null
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              foregroundColor: Colors.black87,
-              leading: IconButton(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.black87,
+        leading: widget.onBack != null
+            ? IconButton(
                 icon: const Icon(Icons.arrow_back),
                 onPressed: widget.onBack,
-              ),
-            )
-          : null,
+              )
+            : null,
+        actions: const [AppLanguageToggle()],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -127,7 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Icon(Icons.badge_outlined, color: Colors.green.shade800, size: 22),
                           const SizedBox(width: 8),
                           Text(
-                            '測試帳號',
+                            tr.loginDemoAccountTitle,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
@@ -138,7 +142,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 10),
                       SelectableText(
-                        'Email：${DemoLogin.email}\nPassword：${DemoLogin.password}',
+                        tr.loginDemoCredentialLines(
+                          DemoLogin.email,
+                          DemoLogin.password,
+                        ),
                         style: TextStyle(
                           fontSize: 14,
                           height: 1.45,
@@ -148,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '亦可以隨意輸入其他 Email／Password（demo 模式會登入）。',
+                        tr.loginDemoAccountNote,
                         style: TextStyle(fontSize: 12, color: Colors.grey.shade700, height: 1.3),
                       ),
                       const SizedBox(height: 10),
@@ -160,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             _passwordController.text = DemoLogin.password;
                           },
                           icon: const Icon(Icons.content_paste_go, size: 20),
-                          label: const Text('一鍵填入'),
+                          label: Text(tr.loginFillDemo),
                         ),
                       ),
                     ],
