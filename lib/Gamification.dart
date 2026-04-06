@@ -218,6 +218,8 @@ class FocusSessionData extends ChangeNotifier {
 
   Timer? timer;
   bool isRunning = false;
+  /// Timer stopped without saving; user can [resumeFocus] to continue.
+  bool isPaused = false;
   Duration remainingDuration = Duration.zero;
   Duration elapsedStopwatch = Duration.zero;
   bool didCompleteNaturally = false;
@@ -245,6 +247,8 @@ class FocusSessionData extends ChangeNotifier {
   }
 
   bool get currentIsRunning => isRunning;
+  bool get currentIsPaused => isPaused;
+  bool get hasActiveSession => isRunning || isPaused;
   Duration get currentRemainingDuration => remainingDuration;
   bool get currentDidCompleteNaturally => didCompleteNaturally;
   Duration get currentInitialDuration => initialDurationForLevel;
@@ -252,7 +256,7 @@ class FocusSessionData extends ChangeNotifier {
   FocusTimerKind get currentTimerKind => timerKind;
 
   void setTimerKind(FocusTimerKind k) {
-    if (isRunning) return;
+    if (isRunning || isPaused) return;
     timerKind = k;
     elapsedStopwatch = Duration.zero;
     remainingDuration = initialDurationForLevel;
@@ -271,27 +275,58 @@ class FocusSessionData extends ChangeNotifier {
     return '${twoDigits(minutes)}:${twoDigits(seconds)}';
   }
 
-  void startStopSession() {
-    if (isRunning) {
-      _stopManual();
-    } else {
-      _start();
-    }
-  }
-
-  /// Separate game-style 開始 / 停止 buttons.
+  /// Separate game-style primary / secondary buttons.
   void startFocus() {
-    if (isRunning) return;
+    if (isRunning || isPaused) return;
     _start();
   }
 
-  void stopFocus() {
+  /// Pause countdown/stopwatch without recording XP (can [resumeFocus]).
+  void pauseFocus() {
     if (!isRunning) return;
-    _stopManual();
+    timer?.cancel();
+    timer = null;
+    isRunning = false;
+    isPaused = true;
+    notifyListeners();
+  }
+
+  void resumeFocus() {
+    if (!isPaused || isRunning) return;
+    isPaused = false;
+    isRunning = true;
+    timer?.cancel();
+    timer = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    notifyListeners();
+  }
+
+  /// End session and record XP (replaces old one-shot stop).
+  void finishFocusSession() {
+    timer?.cancel();
+    timer = null;
+    if (!isRunning && !isPaused) {
+      notifyListeners();
+      return;
+    }
+    isRunning = false;
+    isPaused = false;
+    if (_startedAt == null) {
+      notifyListeners();
+      return;
+    }
+    if (timerKind == FocusTimerKind.stopwatch &&
+        elapsedStopwatch.inSeconds < 5) {
+      _startedAt = null;
+      elapsedStopwatch = Duration.zero;
+      notifyListeners();
+      return;
+    }
+    unawaited(_finalizeAndRecord(naturalComplete: false));
   }
 
   void _start() {
     isRunning = true;
+    isPaused = false;
     _startedAt = DateTime.now();
     didCompleteNaturally = false;
     lastXpAwarded = 0;
@@ -322,28 +357,6 @@ class FocusSessionData extends ChangeNotifier {
       elapsedStopwatch += const Duration(seconds: 1);
       notifyListeners();
     }
-  }
-
-  void _stopManual() {
-    timer?.cancel();
-    timer = null;
-    if (!isRunning) {
-      notifyListeners();
-      return;
-    }
-    isRunning = false;
-    if (_startedAt == null) {
-      notifyListeners();
-      return;
-    }
-    if (timerKind == FocusTimerKind.stopwatch &&
-        elapsedStopwatch.inSeconds < 5) {
-      _startedAt = null;
-      elapsedStopwatch = Duration.zero;
-      notifyListeners();
-      return;
-    }
-    unawaited(_finalizeAndRecord(naturalComplete: false));
   }
 
   Future<void> _finalizeAndRecord({required bool naturalComplete}) async {
@@ -404,6 +417,7 @@ class FocusSessionData extends ChangeNotifier {
     timer?.cancel();
     timer = null;
     isRunning = false;
+    isPaused = false;
     _startedAt = null;
     remainingDuration = initialDurationForLevel;
     elapsedStopwatch = Duration.zero;
@@ -523,7 +537,7 @@ class FocusCityPage extends StatelessWidget {
                   ],
                   selected: {focusData.currentTimerKind},
                   onSelectionChanged: (s) {
-                    if (!focusData.currentIsRunning) {
+                    if (!focusData.hasActiveSession) {
                       focusData.setTimerKind(s.first);
                     }
                   },
@@ -548,7 +562,15 @@ class FocusCityPage extends StatelessWidget {
                   children: [
                     Expanded(
                       child: FilledButton(
-                        onPressed: focusData.currentIsRunning ? null : () => focusData.startFocus(),
+                        onPressed: () {
+                          if (focusData.currentIsRunning) {
+                            focusData.pauseFocus();
+                          } else if (focusData.currentIsPaused) {
+                            focusData.resumeFocus();
+                          } else {
+                            focusData.startFocus();
+                          }
+                        },
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFF2E7D32),
                           disabledBackgroundColor: Colors.grey.shade400,
@@ -558,13 +580,22 @@ class FocusCityPage extends StatelessWidget {
                             side: const BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
-                        child: Text('開始', style: gameText),
+                        child: Text(
+                          focusData.currentIsRunning
+                              ? 'Pause'
+                              : focusData.currentIsPaused
+                                  ? 'Resume'
+                                  : 'Start',
+                          style: gameText,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: FilledButton(
-                        onPressed: !focusData.currentIsRunning ? null : () => focusData.stopFocus(),
+                        onPressed: focusData.hasActiveSession
+                            ? () => focusData.finishFocusSession()
+                            : null,
                         style: FilledButton.styleFrom(
                           backgroundColor: const Color(0xFFC62828),
                           disabledBackgroundColor: Colors.grey.shade300,
@@ -574,7 +605,7 @@ class FocusCityPage extends StatelessWidget {
                             side: const BorderSide(color: Colors.white, width: 2),
                           ),
                         ),
-                        child: Text('停止', style: gameText),
+                        child: Text('Finish', style: gameText),
                       ),
                     ),
                   ],
@@ -613,7 +644,7 @@ class FocusCityPage extends StatelessWidget {
                 return LayoutBuilder(
                   builder: (context, constraints) {
                     const double itemSize = 48.0;
-                    final bool hideTimer = !focusData.currentIsRunning;
+                    final bool hideTimer = !focusData.hasActiveSession;
 
                     return Stack(
                       clipBehavior: Clip.none,
