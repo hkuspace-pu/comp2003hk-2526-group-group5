@@ -1,20 +1,20 @@
 Frontend
-Flutter + Dart
+  Flutter + Dart
 
 State Management
-Provider
+  Provider
 
 Local Storage
-Hive
-SharedPreferences
+  Hive
+  SharedPreferences
 
 Backend
-Supabase
+  Firebase
 
 Database
-PostgreSQL
+  Cloud Firestore
 
 Security
-JWT
-HTTPS
-Row Level Security
+  Firebase Authentication
+  HTTPS
+  Firebase Security Rules

@@ -18,10 +18,10 @@ Flutter App (Cross-platform: Android / iOS / Web)
   │    ├─ SessionRepository
   │    ├─ MoodRepository
   │    ├─ ActivityRepository
-  │    └─ SyncService (offline-first push/pull)
+  │    └─ SyncService (offline-first push/pull with Firebase)
 
   ├─ 4) Local Storage Layer
-  │    ├─ SharedPreferences (token / settings)
+  │    ├─ SharedPreferences (settings / flags / lightweight cache)
   │    └─ Hive Local DB
   │         ├─ sessions_box
   │         ├─ moods_box
@@ -29,21 +29,23 @@ Flutter App (Cross-platform: Android / iOS / Web)
   │         └─ pending_sync_box
 
   └─ 5) Communication Layer
-       └─ HTTPS via Supabase SDK (JWT secured)
+       └─ HTTPS via Firebase SDK
                 ↓
 
-Supabase Backend Platform
+Firebase Backend Platform
 
-  ├─ Authentication (Email/Password + JWT session)
-  ├─ PostgreSQL Database (Persistent Storage)
-  │    ├─ profiles
+  ├─ Authentication
+  │    └─ Firebase Authentication (Email/Password session)
+
+  ├─ Cloud Firestore Database (Persistent Storage)
+  │    ├─ users
   │    ├─ focus_sessions
   │    ├─ mood_entries
   │    ├─ activity_entries
   │    └─ gamification_state (optional)
-  │
-  ├─ Row Level Security (RLS)
-  │    └─ Policy: user_id = auth.uid()
-  │
-  └─ Storage (Media Evidence)
-       └─ activity_media bucket (images/videos)
+
+  ├─ Security Rules
+  │    └─ Rule: request.auth != null && request.auth.uid == userId
+
+  └─ Firebase Storage (Media Evidence)
+       └─ activity_media/{userId}/{fileName}
