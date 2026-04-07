@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
 class SignUpData extends ChangeNotifier {
   bool _privacyPolicyAccepted;
   final TextEditingController userNameController;
@@ -52,33 +48,6 @@ class SignUpData extends ChangeNotifier {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<SignUpData>(
-      create: (BuildContext context) => SignUpData(),
-      builder: (BuildContext context, Widget? child) {
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Sign Up App',
-          theme: ThemeData(
-            primarySwatch: Colors.green,
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              iconTheme: IconThemeData(color: Colors.black87),
-            ),
-          ),
-          home: const SignUpScreen(),
-        );
-      },
-    );
-  }
-}
-
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
@@ -112,7 +81,7 @@ class SignUpScreen extends StatelessWidget {
         ),
       );
       // Example: Navigate to another screen after successful signup
-      // Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const HomeScreen()));
+      // Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const UserWelcomeScreen()));
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
