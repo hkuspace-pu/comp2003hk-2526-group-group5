@@ -69,32 +69,6 @@ class UserProvider extends ChangeNotifier {
   }
 }
 
-void main() => runApp(const MyApp());
-
-/// Root widget
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Settings App',
-        theme: ThemeData(
-          primarySwatch: Colors.teal,
-          visualDensity: VisualDensity.adaptivePlatformDensity,
-          appBarTheme: const AppBarTheme(elevation: 0),
-          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.teal)
-              .copyWith(secondary: Colors.grey.shade600),
-          scaffoldBackgroundColor: const Color(0xFFF5F5F5),
-        ),
-        home: const SettingsPage(),
-      ),
-    );
-  }
-}
 const Color _kBrandGreen = Color(0xFF46AA57);
 const Color _kCream = Color(0xFFF8F8EC);
 

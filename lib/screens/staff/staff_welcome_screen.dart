@@ -1,41 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../Login.dart';
-import '../../Register.dart';
-import '../staff/staff_welcome_screen.dart';
+import 'staff_login_screen.dart';
+import 'staff_signup_screen.dart';
+import 'staff_theme.dart';
 
-const Color _kWelcomeBg = Color(0xFFF8F8EC);
-const Color _kAccentGreen = Color(0xFF46AA57);
-const Color _kTitleBlue = Color(0xFF1E73BE);
+/// Entry screen for Staff (專員) — separate from the student welcome flow.
+class StaffWelcomeScreen extends StatelessWidget {
+  const StaffWelcomeScreen({super.key});
 
-/// Student app welcome landing.
-class UserWelcomeScreen extends StatelessWidget {
-  const UserWelcomeScreen({super.key});
-
-  void _openSignIn(BuildContext context) {
+  void _openStaffLogin(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => const LoginScreen(),
+        builder: (BuildContext context) => const StaffLoginScreen(),
       ),
     );
   }
 
-  void _openSignUp(BuildContext context) {
+  void _openStaffSignUp(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => ChangeNotifierProvider<SignUpData>(
-          create: (_) => SignUpData(),
-          child: const SignUpScreen(),
-        ),
-      ),
-    );
-  }
-
-  void _openStaffPortal(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => const StaffWelcomeScreen(),
+        builder: (BuildContext context) => const StaffSignUpScreen(),
       ),
     );
   }
@@ -45,7 +29,7 @@ class UserWelcomeScreen extends StatelessWidget {
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: _kWelcomeBg,
+      backgroundColor: StaffTheme.background,
       body: SafeArea(
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
@@ -59,93 +43,85 @@ class UserWelcomeScreen extends StatelessWidget {
                     children: <Widget>[
                       const SizedBox(height: 24),
                       Text(
-                        'Welcome',
+                        'Staff portal',
                         textAlign: TextAlign.center,
                         style: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
-                          color: Colors.black87,
+                          color: StaffTheme.primary,
                           letterSpacing: -0.5,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Grow your focus. Build your city.',
+                        '專員專用 · 管理與檢視使用者資料',
                         textAlign: TextAlign.center,
-                        style: textTheme.titleMedium?.copyWith(
+                        style: textTheme.titleSmall?.copyWith(
+                          color: StaffTheme.primary.withValues(alpha: 0.75),
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Sign in with your staff account to open the dashboard and user directory.',
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
                           color: Colors.black54,
-                          fontWeight: FontWeight.w500,
+                          height: 1.4,
                         ),
                       ),
                       const SizedBox(height: 36),
                       Center(
                         child: Container(
-                          width: 188,
-                          height: 188,
+                          width: 160,
+                          height: 160,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
+                            color: StaffTheme.primary.withValues(alpha: 0.08),
                             boxShadow: <BoxShadow>[
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.08),
+                                color: StaffTheme.primary.withValues(alpha: 0.12),
                                 blurRadius: 24,
                                 offset: const Offset(0, 12),
                               ),
                             ],
                           ),
-                          child: ClipOval(
-                            child: Image.asset(
-                              'images/home_city_image.png',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => ColoredBox(
-                                color: _kTitleBlue.withValues(alpha: 0.12),
-                                child: const Icon(
-                                  Icons.location_city_rounded,
-                                  size: 72,
-                                  color: _kTitleBlue,
-                                ),
-                              ),
-                            ),
+                          child: const Icon(
+                            Icons.admin_panel_settings_rounded,
+                            size: 72,
+                            color: StaffTheme.primary,
                           ),
                         ),
                       ),
-                      const SizedBox(height: 28),
-                      Text(
-                        'Screen time: Build your city',
-                        textAlign: TextAlign.center,
-                        style: textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: _kTitleBlue,
-                          height: 1.25,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      _Bullet(
-                        icon: Icons.timer_outlined,
-                        text: 'Stay on task with focus sessions',
-                      ),
-                      const SizedBox(height: 10),
-                      _Bullet(
-                        icon: Icons.mood_outlined,
-                        text: 'Log mood and see your patterns',
-                      ),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 20),
                       _Bullet(
                         icon: Icons.dashboard_customize_outlined,
-                        text: 'Track progress on your dashboard',
+                        text: 'Overview: engagement and focus trends',
+                      ),
+                      const SizedBox(height: 10),
+                      _Bullet(
+                        icon: Icons.groups_outlined,
+                        text: 'User directory: search and open profiles',
+                      ),
+                      const SizedBox(height: 10),
+                      _Bullet(
+                        icon: Icons.lock_outline_rounded,
+                        text: 'Restricted to authorised staff accounts',
                       ),
                       const Spacer(),
                       const SizedBox(height: 32),
                       SizedBox(
                         height: 54,
                         child: FilledButton(
-                          onPressed: () => _openSignIn(context),
+                          onPressed: () => _openStaffLogin(context),
                           style: FilledButton.styleFrom(
-                            backgroundColor: _kAccentGreen,
-                            foregroundColor: Colors.white,
+                            backgroundColor: StaffTheme.primary,
+                            foregroundColor: StaffTheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
                             elevation: 4,
-                            shadowColor: _kAccentGreen.withValues(alpha: 0.45),
+                            shadowColor: StaffTheme.primary.withValues(alpha: 0.35),
                           ),
                           child: const Text(
                             'Sign in',
@@ -158,15 +134,15 @@ class UserWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       SizedBox(
-                        height: 54,
+                        height: 52,
                         child: OutlinedButton(
-                          onPressed: () => _openSignUp(context),
+                          onPressed: () => _openStaffSignUp(context),
                           style: OutlinedButton.styleFrom(
-                            side: const BorderSide(
-                              color: _kAccentGreen,
-                              width: 2,
+                            foregroundColor: StaffTheme.primary,
+                            side: BorderSide(
+                              color: StaffTheme.primary.withValues(alpha: 0.65),
+                              width: 1.6,
                             ),
-                            foregroundColor: _kAccentGreen,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -174,29 +150,20 @@ class UserWelcomeScreen extends StatelessWidget {
                           child: const Text(
                             'Sign up',
                             style: TextStyle(
-                              fontSize: 17,
+                              fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'New here? Create an account to save your city and stats.',
-                        textAlign: TextAlign.center,
-                        style: textTheme.bodySmall?.copyWith(
-                          color: Colors.black45,
-                          height: 1.35,
-                        ),
-                      ),
                       const SizedBox(height: 16),
                       TextButton(
-                        onPressed: () => _openStaffPortal(context),
+                        onPressed: () => Navigator.of(context).maybePop(),
                         child: Text(
-                          'Staff portal · 專員入口',
+                          'Back to student app',
                           style: TextStyle(
-                            fontWeight: FontWeight.w700,
-                            color: _kTitleBlue,
+                            fontWeight: FontWeight.w600,
+                            color: StaffTheme.accent,
                           ),
                         ),
                       ),
@@ -227,7 +194,7 @@ class _Bullet extends StatelessWidget {
         Icon(
           icon,
           size: 22,
-          color: _kAccentGreen.withValues(alpha: 0.9),
+          color: StaffTheme.primary.withValues(alpha: 0.85),
         ),
         const SizedBox(width: 12),
         Expanded(
