@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'Login.dart';
+import 'screens/user/privacy_policy_screen.dart';
+import 'screens/user/signed_in_placeholder_screen.dart';
+
 class SignUpData extends ChangeNotifier {
   bool _privacyPolicyAccepted;
   final TextEditingController userNameController;
@@ -51,45 +55,54 @@ class SignUpData extends ChangeNotifier {
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
+  bool _looksLikeEmail(String value) {
+    final String v = value.trim();
+    return v.contains('@') && v.contains('.');
+  }
+
   void _handleSignUp(BuildContext context, SignUpData signUpData) {
-    if (signUpData.privacyPolicyAccepted) {
-      final String userName = signUpData.userNameController.text;
-      final String email = signUpData.emailController.text;
-      final String password = signUpData.passwordController.text;
-      final String confirmPassword = signUpData.confirmPasswordController.text;
-
-      if (password != confirmPassword) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Passwords do not match.'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        return;
-      }
-
-      // In a real application, this would involve sending data to a server
-      // or performing local authentication.
-      // For this example, we'll just print the data and show a snackbar.
-      print(
-          'Attempting sign up with Username: $userName, Email: $email, Password: $password');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Sign up successful for $userName!'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-      // Example: Navigate to another screen after successful signup
-      // Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const UserWelcomeScreen()));
-    } else {
+    if (!signUpData.privacyPolicyAccepted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please accept the privacy policy to sign up.'),
           duration: Duration(seconds: 2),
         ),
       );
+      return;
     }
+
+    final String userName = signUpData.userNameController.text.trim();
+    final String email = signUpData.emailController.text.trim();
+    final String password = signUpData.passwordController.text;
+    final String confirmPassword = signUpData.confirmPasswordController.text;
+
+    if (userName.isEmpty || email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill in all fields.')),
+      );
+      return;
+    }
+    if (!_looksLikeEmail(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid-looking email.')),
+      );
+      return;
+    }
+    if (password != confirmPassword) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Passwords do not match.'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const SignedInPlaceholderScreen(),
+      ),
+    );
   }
 
   @override
@@ -104,6 +117,14 @@ class SignUpScreen extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.arrow_back_rounded),
+                      color: Colors.black87,
+                    ),
+                  ),
                   // Title
                   const Text(
                     'Sign Up',
@@ -281,8 +302,9 @@ class SignUpScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
 
-                  // Privacy Policy Checkbox
+                  // Privacy policy (UI only)
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Checkbox(
                         value: signUpData.privacyPolicyAccepted,
@@ -294,24 +316,54 @@ class SignUpScreen extends StatelessWidget {
                         activeColor: const Color(0xFF3CB371),
                         checkColor: Colors.white,
                         side: WidgetStateBorderSide.resolveWith(
-                              (Set<WidgetState> states) =>
+                          (Set<WidgetState> states) =>
                               BorderSide(color: Colors.grey[400]!, width: 2),
                         ),
                       ),
                       Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            signUpData.privacyPolicyAccepted =
-                            !signUpData.privacyPolicyAccepted;
-                          },
-                          child: Text(
-                            'I agree with privacy polciy',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey[700],
-                              fontWeight: FontWeight.w500,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            GestureDetector(
+                              onTap: () {
+                                signUpData.privacyPolicyAccepted =
+                                    !signUpData.privacyPolicyAccepted;
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10),
+                                child: Text(
+                                  'I agree with the privacy policy',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[700],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
                             ),
-                          ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: Size.zero,
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (BuildContext context) =>
+                                        const PrivacyPolicyScreen(),
+                                  ),
+                                );
+                              },
+                              child: const Text(
+                                'Read full policy',
+                                style: TextStyle(
+                                  color: Color(0xFF46AA57),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
@@ -350,9 +402,12 @@ class SignUpScreen extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () {
-                          // In a real app, you would navigate to the LoginScreen
-                          print('Navigating to LoginScreen.');
-                          // Example: Navigator.pushReplacement(context, MaterialPageRoute<void>(builder: (context) => const LoginScreen()));
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute<void>(
+                              builder: (BuildContext context) =>
+                                  const LoginScreen(),
+                            ),
+                          );
                         },
                         child: const Text(
                           'Login',

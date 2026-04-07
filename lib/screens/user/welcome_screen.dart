@@ -8,7 +8,7 @@ const Color _kWelcomeBg = Color(0xFFF8F8EC);
 const Color _kAccentGreen = Color(0xFF46AA57);
 const Color _kTitleBlue = Color(0xFF1E73BE);
 
-/// Part 1 / 10 — User flow: welcome landing before Sign In / Sign Up.
+/// User welcome landing (UI only; no Firebase Auth in this roadmap).
 class UserWelcomeScreen extends StatelessWidget {
   const UserWelcomeScreen({super.key});
 
