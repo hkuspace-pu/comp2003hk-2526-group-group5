@@ -283,7 +283,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get backToWelcomeTooltip => '返回歡迎頁';
 
   @override
-  String get shellTitleBuildCity => '砌你嘅城市';
+  String get shellTitleBuildCity => '建造你的城市';
 
   @override
   String get shellTitleMoodLog => '心情記錄';
@@ -1148,7 +1148,7 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   String get backToWelcomeTooltip => '返回歡迎頁';
 
   @override
-  String get shellTitleBuildCity => '砌你嘅城市';
+  String get shellTitleBuildCity => '建造你的城市';
 
   @override
   String get shellTitleMoodLog => '心情記錄';
