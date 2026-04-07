@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Visual identity for Staff (專員) flows — distinct from the student green theme.
+/// Visual identity for Staff (員工) flows — distinct from the student green theme.
 abstract final class StaffTheme {
   StaffTheme._();
 

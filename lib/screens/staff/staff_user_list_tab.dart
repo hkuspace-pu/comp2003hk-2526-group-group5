@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../main_shell_insets.dart';
 import 'staff_end_user.dart';
@@ -37,6 +38,7 @@ class _StaffUserListTabState extends State<StaffUserListTab> {
   }
 
   void _openDetail(StaffEndUser u) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: StaffTheme.surface,
@@ -74,21 +76,21 @@ class _StaffUserListTabState extends State<StaffUserListTab> {
                 style: TextStyle(color: Colors.grey.shade800, fontSize: 15),
               ),
               const SizedBox(height: 16),
-              _DetailRow(label: 'User ID', value: u.id),
-              _DetailRow(label: 'Level', value: '${u.level}'),
-              _DetailRow(label: 'Total XP', value: '${u.totalXp}'),
-              _DetailRow(label: 'Last active', value: u.lastActiveLabel),
+              _DetailRow(label: l10n.staffUserId, value: u.id),
+              _DetailRow(label: l10n.levelLabel, value: '${u.level}'),
+              _DetailRow(label: l10n.totalXpLabel, value: '${u.totalXp}'),
+              _DetailRow(label: l10n.staffLastActive, value: u.lastActiveLabel),
               _DetailRow(
-                label: 'Focus (this week)',
-                value: '${u.focusMinutesThisWeek} min',
+                label: l10n.staffFocusThisWeek,
+                value: l10n.focusMinutesValue(u.focusMinutesThisWeek),
               ),
-              _DetailRow(label: 'Status', value: u.statusLabel),
+              _DetailRow(label: l10n.staffStatus, value: u.statusLabel),
               const SizedBox(height: 28),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Close'),
+                  child: Text(l10n.closeLabel),
                 ),
               ),
             ],
@@ -100,6 +102,7 @@ class _StaffUserListTabState extends State<StaffUserListTab> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final List<StaffEndUser> rows = _filtered();
 
     return ColoredBox(
@@ -118,7 +121,7 @@ class _StaffUserListTabState extends State<StaffUserListTab> {
               controller: _query,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
-                hintText: 'Search name, email, or ID',
+                hintText: l10n.staffSearchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
                 filled: true,
                 fillColor: StaffTheme.surface,

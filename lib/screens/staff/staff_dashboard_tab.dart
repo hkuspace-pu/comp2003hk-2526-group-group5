@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../main_shell_insets.dart';
 import 'staff_theme.dart';
@@ -29,6 +30,9 @@ class StaffDashboardTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final List<String> dayLabels =
+        l10n.weekChartDayLabels.split(',').map((String s) => s.trim()).toList();
     final List<StaffEndUser> users = staffSampleEndUsers();
     final int totalUsers = users.length;
     final int activeUsers =
@@ -59,7 +63,7 @@ class StaffDashboardTab extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
                   Text(
-                    'Hello, $staffDisplayName',
+                    l10n.staffHelloName(staffDisplayName),
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                           color: StaffTheme.primary,
@@ -75,8 +79,7 @@ class StaffDashboardTab extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'This overview shows directory-wide metrics and sample weekly trends. '
-                    'Connect to your backend when ready.',
+                    l10n.staffOverviewIntro,
                     style: TextStyle(
                       fontSize: 12,
                       height: 1.35,
@@ -89,7 +92,7 @@ class StaffDashboardTab extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            'Overview',
+            l10n.staffOverviewSection,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                   color: StaffTheme.primary,
@@ -100,7 +103,7 @@ class StaffDashboardTab extends StatelessWidget {
             children: <Widget>[
               Expanded(
                 child: _StatCard(
-                  label: 'Registered',
+                  label: l10n.staffRegistered,
                   value: '$totalUsers',
                   icon: Icons.people_outline_rounded,
                 ),
@@ -108,7 +111,7 @@ class StaffDashboardTab extends StatelessWidget {
               const SizedBox(width: 10),
               Expanded(
                 child: _StatCard(
-                  label: 'Active (status)',
+                  label: l10n.staffActiveStatus,
                   value: '$activeUsers',
                   icon: Icons.trending_up_rounded,
                 ),
@@ -117,7 +120,7 @@ class StaffDashboardTab extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _StatCard(
-            label: 'Focus minutes (this week · cohort)',
+            label: l10n.staffFocusMinutesCohortWeek,
             value: '$totalFocusWeek',
             icon: Icons.timer_outlined,
             wide: true,
@@ -138,7 +141,7 @@ class StaffDashboardTab extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
-                      'All users — focus minutes (sample week)',
+                      l10n.staffAllUsersChartTitle,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
@@ -184,23 +187,14 @@ class StaffDashboardTab extends StatelessWidget {
                             sideTitles: SideTitles(
                               showTitles: true,
                               getTitlesWidget: (double v, _) {
-                                const List<String> days = <String>[
-                                  'M',
-                                  'T',
-                                  'W',
-                                  'T',
-                                  'F',
-                                  'S',
-                                  'S',
-                                ];
                                 final int i = v.toInt();
-                                if (i < 0 || i >= days.length) {
+                                if (i < 0 || i >= dayLabels.length) {
                                   return const SizedBox.shrink();
                                 }
                                 return Padding(
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Text(
-                                    days[i],
+                                    dayLabels[i],
                                     style: TextStyle(
                                       fontSize: 11,
                                       color: Colors.grey[700],

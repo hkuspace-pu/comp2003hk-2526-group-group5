@@ -5,6 +5,9 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:groupproject_group5/gamification_l10n.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
+
 import 'focus_city_layout.dart';
 
 enum ItemType { tree, park, house, building, road, river, bridge }
@@ -134,35 +137,6 @@ class GamificationData extends ChangeNotifier {
         _unlockedItemTypes.add(item.type);
       }
     }
-  }
-
-  String get nextUnlockProgress {
-    ItemInfo? nextItemToUnlock;
-    final List<ItemInfo> sortedItems = List<ItemInfo>.from(allItems)
-      ..sort((ItemInfo a, ItemInfo b) => a.unlockXp.compareTo(b.unlockXp));
-
-    for (final ItemInfo item in sortedItems) {
-      if (!_unlockedItemTypes.contains(item.type)) {
-        nextItemToUnlock = item;
-        break;
-      }
-    }
-
-    final int nextLevel = _currentLevel + 1;
-    final int? nextLevelXpThreshold = levelXpThresholds[nextLevel];
-
-    if (nextItemToUnlock != null && nextLevelXpThreshold != null) {
-      if (nextItemToUnlock.unlockXp <= nextLevelXpThreshold) {
-        return 'NEXT UNLOCK AT ${nextItemToUnlock.unlockXp} XP: ${nextItemToUnlock.label} • ${nextItemToUnlock.description}';
-      } else {
-        return 'NEXT UNLOCK AT $nextLevelXpThreshold XP: Level $nextLevel';
-      }
-    } else if (nextItemToUnlock != null) {
-      return 'NEXT UNLOCK AT ${nextItemToUnlock.unlockXp} XP: ${nextItemToUnlock.label} • ${nextItemToUnlock.description}';
-    } else if (nextLevelXpThreshold != null) {
-      return 'NEXT UNLOCK AT $nextLevelXpThreshold XP: Level $nextLevel';
-    }
-    return 'All items unlocked and maximum level achieved!';
   }
 
   Future<void> placeItem(ItemType type, Offset position) async {
@@ -369,33 +343,6 @@ class FocusSessionData extends ChangeNotifier {
   }
 }
 
-void main() {
-  runApp(const FocusCityApp());
-}
-
-class FocusCityApp extends StatelessWidget {
-  const FocusCityApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (context) => GamificationData()),
-          ChangeNotifierProvider<FocusSessionData>(
-            create: (context) {
-              final gamificationData = Provider.of<GamificationData>(context, listen: false);
-              return FocusSessionData(gamificationData);
-            },
-          ),
-        ],
-        child: const FocusCityPage(),
-      ),
-    );
-  }
-}
-
 /// Green drag-and-drop city + optional overlay timer (used below [FocusSessionPanel]).
 class _FocusCityGreenCanvas extends StatelessWidget {
   const _FocusCityGreenCanvas({this.compact = false});
@@ -411,9 +358,11 @@ class _FocusCityGreenCanvas extends StatelessWidget {
         if (focusData.currentDidCompleteNaturally) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             HapticFeedback.vibrate();
+            final AppLocalizations l10n = AppLocalizations.of(context)!;
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
               content: Text(
-                  'Completed! +${focusData.currentXpAwardOnCompletion} XP!'),
+                l10n.focusCompletedXp(focusData.currentXpAwardOnCompletion),
+              ),
             ));
             gamificationData.addXp(focusData.currentXpAwardOnCompletion);
             focusData.acknowledgeCompletion();
@@ -594,6 +543,7 @@ class FocusCityBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final TextTheme textTheme = Theme.of(context).textTheme;
     final MediaQueryData mq = MediaQuery.of(context);
     final double fallbackViewportH = mq.size.height;
@@ -722,19 +672,14 @@ class FocusCityBody extends StatelessWidget {
                             ),
                             SizedBox(width: starGap),
                             Text(
-                              'Level ${gamificationData.currentCurrentLevel}',
+                              l10n.levelXpLine(
+                                gamificationData.currentCurrentLevel,
+                                gamificationData.currentTotalXp,
+                              ),
                               style: TextStyle(
                                 fontWeight: FontWeight.w800,
                                 fontSize: lvlFs,
                                 color: _brandGreen,
-                              ),
-                            ),
-                            Text(
-                              ' · ${gamificationData.currentTotalXp} XP',
-                              style: TextStyle(
-                                fontSize: lvlFs,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.grey.shade800,
                               ),
                             ),
                           ],
@@ -815,7 +760,10 @@ class FocusCityBody extends StatelessWidget {
                     SizedBox(width: compact ? 6 : 10),
                     Expanded(
                       child: Text(
-                        gamificationData.nextUnlockProgress,
+                        localizedNextUnlockProgress(
+                          gamificationData,
+                          l10n,
+                        ),
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: compact ? 10.5 : 11.5,
@@ -840,7 +788,7 @@ class FocusCityBody extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: <Widget>[
                   Text(
-                    'Place items',
+                    l10n.placeItemsTitle,
                     style: textTheme.labelMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: Colors.grey.shade700,
@@ -864,7 +812,7 @@ class FocusCityBody extends StatelessWidget {
                           ),
                         ),
                         child: Text(
-                          'Pause or finish focus to drag',
+                          l10n.pauseDragHint,
                           style: TextStyle(
                             fontSize: 9,
                             fontWeight: FontWeight.w700,
@@ -952,7 +900,9 @@ class FocusCityBody extends StatelessWidget {
                                   : Colors.grey.shade700,
                             ),
                             label: Text(
-                              gamificationData.currentDemoUnlockAll ? 'Demo on' : 'Demo',
+                              gamificationData.currentDemoUnlockAll
+                                  ? l10n.demoOn
+                                  : l10n.demo,
                               style: TextStyle(
                                 fontSize: compact ? 11 : 12,
                                 fontWeight: FontWeight.w700,
@@ -989,8 +939,8 @@ class FocusCityBody extends StatelessWidget {
                       : Icons.play_arrow),
                   label: Text(
                     focusData.currentIsRunning
-                        ? 'END FOCUS SESSION'
-                        : 'START ${focusData.targetMinutes}-MIN FOCUS SESSION',
+                        ? l10n.endFocusSession
+                        : l10n.startFocusSessionMinutes(focusData.targetMinutes),
                   ),
                   style: FilledButton.styleFrom(
                     backgroundColor: const Color(0xFF46AA57),
@@ -1019,7 +969,7 @@ class FocusCityBody extends StatelessWidget {
                 size: compact ? 18 : 24,
               ),
               label: Text(
-                'Reset city progress',
+                l10n.resetCityProgress,
                 style: TextStyle(
                   fontWeight: FontWeight.w600,
                   color: Colors.grey.shade800,
@@ -1053,15 +1003,16 @@ class FocusCityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
       appBar: AppBar(
-        title: const Text('Focus City'),
+        title: Text(l10n.focusCityAppBar),
         centerTitle: true,
       ),
-      body: const FocusCityBody(
-        progressTitle: "TODAY'S CITY PROGRESS",
-        progressSubtitle: 'Build your city with each focus session',
+      body: FocusCityBody(
+        progressTitle: l10n.focusCityProgressTitle,
+        progressSubtitle: l10n.focusCityProgressSubtitle,
         showBottomStartStopButton: true,
       ),
     );
@@ -1086,6 +1037,8 @@ class DraggableUnlockableItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final String itemLabel = localizedItemLabel(itemInfo.type, l10n);
     final double size = tileSize;
     final double r = (size * 0.22).clamp(4.0, 10.0);
     final double gap = (size * 0.1).clamp(2.0, 4.0);
@@ -1122,14 +1075,14 @@ class DraggableUnlockableItem extends StatelessWidget {
             ),
             SizedBox(height: gap),
             Text(
-              itemInfo.label,
+              itemLabel,
               style: TextStyle(fontSize: labelFs, color: Colors.grey),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,
             ),
             Text(
-              '${itemInfo.unlockXp} XP',
+              l10n.xpAmount(itemInfo.unlockXp),
               style: TextStyle(
                 fontSize: subFs,
                 fontWeight: FontWeight.bold,
@@ -1163,14 +1116,14 @@ class DraggableUnlockableItem extends StatelessWidget {
         ),
         SizedBox(height: gap),
         Text(
-          itemInfo.label,
+          itemLabel,
           style: TextStyle(fontSize: labelFs, color: Colors.black),
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
           textAlign: TextAlign.center,
         ),
         Text(
-          'Place',
+          l10n.placeLabel,
           style: TextStyle(fontSize: subFs, fontWeight: FontWeight.bold),
         ),
       ],
@@ -1178,7 +1131,7 @@ class DraggableUnlockableItem extends StatelessWidget {
 
     if (!allowDrag) {
       return Tooltip(
-        message: 'Pause or finish focus to place on the city',
+        message: l10n.pausePlaceTooltip,
         child: Opacity(
           opacity: 0.55,
           child: paletteChild,

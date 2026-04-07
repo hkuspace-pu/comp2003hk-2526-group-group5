@@ -1,25 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 import 'main_shell_insets.dart';
-
-void main() {
-  runApp(const MoodLoggingApp());
-}
-
-class MoodLoggingApp extends StatelessWidget {
-  const MoodLoggingApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mood Logging',
-      debugShowCheckedModeBanner: false,
-      home: const MoodLoggingPage(),
-    );
-  }
-}
 
 class MoodLoggingPage extends StatefulWidget {
   const MoodLoggingPage({super.key, this.embedded = false});
@@ -52,23 +36,23 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
     _brandGreen,
   ];
 
-  final List<String> moodTexts = <String>[
-    'I feel very sad!',
-    'I feel a bit down!',
-    'I feel normal!',
-    'I feel good!',
-    'I feel great!',
-  ];
-
-  final List<String> moodShortLabels = <String>[
-    'Very low',
-    'Low',
-    'OK',
-    'Good',
-    'Great',
-  ];
-
   int _selectedIndex = 0;
+
+  List<String> _moodPhrases(AppLocalizations l10n) => <String>[
+        l10n.moodVerySad,
+        l10n.moodBitDown,
+        l10n.moodNormal,
+        l10n.moodGood,
+        l10n.moodGreat,
+      ];
+
+  List<String> _moodScaleLabels(AppLocalizations l10n) => <String>[
+        l10n.moodScaleVeryLow,
+        l10n.moodScaleLow,
+        l10n.moodScaleNormal,
+        l10n.moodScaleGood,
+        l10n.moodScaleGreat,
+      ];
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
@@ -81,11 +65,14 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final List<String> moodPhrases = _moodPhrases(l10n);
+    final List<String> moodScaleLabels = _moodScaleLabels(l10n);
 
     final List<Widget> moodColumn = <Widget>[
       Text(
-        'How are you feeling?',
+        l10n.moodQuestion,
         style: textTheme.titleLarge?.copyWith(
           fontWeight: FontWeight.w800,
           letterSpacing: -0.3,
@@ -93,7 +80,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
       ),
       const SizedBox(height: 6),
       Text(
-        'Move along the scale or tap an icon to log how you feel right now.',
+        l10n.moodInstruction,
         style: TextStyle(
           fontSize: 14,
           height: 1.4,
@@ -141,7 +128,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      moodTexts[selectedMood],
+                      moodPhrases[selectedMood],
                       textAlign: TextAlign.center,
                       style: textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
@@ -150,7 +137,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      moodShortLabels[selectedMood],
+                      moodScaleLabels[selectedMood],
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -250,7 +237,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          moodShortLabels[i],
+                                          moodScaleLabels[i],
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -293,7 +280,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
-                      'Saved: ${moodTexts[selectedMood]}',
+                      l10n.moodSaved(moodPhrases[selectedMood]),
                       style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
                   ),
@@ -311,9 +298,9 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
           elevation: 0,
         ),
         icon: const Icon(Icons.save_rounded, size: 22),
-        label: const Text(
-          'Save mood',
-          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+        label: Text(
+          l10n.moodSaveButton,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
         ),
       ),
       const SizedBox(height: 12),
@@ -339,9 +326,9 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
           onPressed: () {},
         ),
         centerTitle: true,
-        title: const Text(
-          'Mood Logging',
-          style: TextStyle(
+        title: Text(
+          l10n.moodLoggingTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
           ),

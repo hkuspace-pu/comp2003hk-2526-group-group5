@@ -1,33 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import 'app_colors.dart';
 import 'main_shell_insets.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Session Management',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF46AA57),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const SessionCompleteScreen(),
-      debugShowCheckedModeBanner: false,
-    );
-  }
-}
 
 class SessionCompleteScreen extends StatefulWidget {
   const SessionCompleteScreen({super.key, this.embedded = false});
@@ -59,17 +35,24 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
 
   void _submitSession() {
     HapticFeedback.mediumImpact();
-    final String mediaStatus = _isMediaAdded ? 'with photo' : 'without media';
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final String comment = _commentController.text.trim();
+    final String message;
+    if (comment.isEmpty) {
+      message =
+          _isMediaAdded ? l10n.sessionSavedWithPhoto : l10n.sessionSavedWithoutMedia;
+    } else {
+      message = _isMediaAdded
+          ? l10n.sessionSavedWithPhotoNote
+          : l10n.sessionSavedWithoutMediaNote;
+    }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         behavior: SnackBarBehavior.floating,
         margin: const EdgeInsets.fromLTRB(8, 0, 8, 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         content: Text(
-          comment.isEmpty
-              ? 'Session saved $mediaStatus.'
-              : 'Session saved $mediaStatus. Note recorded.',
+          message,
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
@@ -77,20 +60,23 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
   }
 
   void _onBackPressed() {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Back button pressed!')),
+      SnackBar(content: Text(l10n.backButtonPressed)),
     );
   }
 
   void _onItemTapped(int index) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     setState(() => _selectedIndex = index);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Tapped item: $index')),
+      SnackBar(content: Text(l10n.navItemTapped('${index + 1}'))),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final TextTheme textTheme = Theme.of(context).textTheme;
 
     final Widget scroll = CustomScrollView(
@@ -126,7 +112,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
                             Text(
-                              'Session activity',
+                              l10n.sessionActivityTitle,
                               style: textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.w800,
                                 letterSpacing: -0.2,
@@ -134,7 +120,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              'Add a snapshot and a short note about your focus session.',
+                              l10n.sessionActivitySubtitle,
                               style: TextStyle(
                                 fontSize: 13,
                                 height: 1.35,
@@ -159,7 +145,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
-                            content: const Text('Share activity'),
+                            content: Text(l10n.shareActivitySnack),
                           ),
                         );
                       },
@@ -172,16 +158,16 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                         ),
                       ),
                       icon: const Icon(Icons.share_rounded, size: 20),
-                      label: const Text(
-                        'Share this activity',
-                        style: TextStyle(fontWeight: FontWeight.w600),
+                      label: Text(
+                        l10n.shareThisActivity,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
                 ],
                 Text(
-                  'Media',
+                  l10n.mediaSection,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -200,14 +186,14 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Photo or video',
+                          l10n.photoOrVideo,
                           style: textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Optional — tap the area to attach media.',
+                          l10n.optionalTapMedia,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade600,
@@ -271,7 +257,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                                                 size: 22,
                                               ),
                                               onPressed: _togglePlaceholderMedia,
-                                              tooltip: 'Remove',
+                                              tooltip: l10n.removeTooltip,
                                             ),
                                           ),
                                         ),
@@ -287,7 +273,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                                         ),
                                         const SizedBox(height: 10),
                                         Text(
-                                          'Tap to add media',
+                                          l10n.tapToAddMedia,
                                           style: TextStyle(
                                             fontWeight: FontWeight.w600,
                                             color: Colors.grey.shade800,
@@ -295,7 +281,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
-                                          'Sample image attached',
+                                          l10n.sampleImageAttached,
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: Colors.grey.shade600,
@@ -312,7 +298,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Notes',
+                  l10n.notesSection,
                   style: textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
@@ -331,14 +317,14 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
-                          'Reflection',
+                          l10n.reflectionTitle,
                           style: textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'What stood out during this session?',
+                          l10n.reflectionPrompt,
                           style: TextStyle(
                             fontSize: 13,
                             color: Colors.grey.shade600,
@@ -350,7 +336,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                           maxLines: 4,
                           textInputAction: TextInputAction.newline,
                           decoration: InputDecoration(
-                            hintText: 'Write a short reflection…',
+                            hintText: l10n.reflectionHint,
                             hintStyle: TextStyle(color: Colors.grey.shade500),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
@@ -386,9 +372,9 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                     elevation: 0,
                   ),
                   icon: const Icon(Icons.check_rounded, size: 22),
-                  label: const Text(
-                    'Save session',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+                  label: Text(
+                    l10n.saveSession,
+                    style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
                   ),
                 ),
               ],
@@ -410,9 +396,9 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
           onPressed: _onBackPressed,
           color: Colors.white,
         ),
-        title: const Text(
-          'Session Activity',
-          style: TextStyle(
+        title: Text(
+          l10n.sessionActivityAppBar,
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),

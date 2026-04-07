@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'dart:async'; // Required for Future.delayed
 
 import 'main_shell_insets.dart';
 import 'screens/main/settings_subpages.dart';
+import 'widgets/language_switcher.dart';
 
 class User {
   final String id;
@@ -184,7 +186,7 @@ class UserProfileTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Account & profile',
+                        AppLocalizations.of(context)!.userRoleLabel,
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -254,8 +256,9 @@ class _SettingsPageState extends State<SettingsPage> {
 
   void _onItemTapped(int index) {
     setState(() => _selectedIndex = index);
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Bottom nav item tapped: ${index + 1}')),
+      SnackBar(content: Text(l10n.bottomNavTapped('${index + 1}'))),
     );
   }
 
@@ -284,6 +287,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
         final User? user = userProvider.currentUser;
         if (user == null) {
+          final AppLocalizations l10n = AppLocalizations.of(context)!;
           return Center(
             child: Padding(
               padding: const EdgeInsets.all(32),
@@ -293,14 +297,14 @@ class _SettingsPageState extends State<SettingsPage> {
                   Icon(Icons.person_off_outlined, size: 64, color: Colors.grey.shade400),
                   const SizedBox(height: 16),
                   Text(
-                    'No account loaded',
+                    l10n.noAccountLoaded,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w800,
                         ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Sign in from the welcome screen, or continue below.',
+                    l10n.signInFromWelcome,
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey.shade700, height: 1.35),
                   ),
@@ -317,9 +321,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       ),
                     ),
                     icon: const Icon(Icons.login_rounded),
-                    label: const Text(
-                      'Log in',
-                      style: TextStyle(fontWeight: FontWeight.w700),
+                    label: Text(
+                      l10n.loginButton,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
@@ -328,6 +332,7 @@ class _SettingsPageState extends State<SettingsPage> {
           );
         }
 
+        final AppLocalizations l10n = AppLocalizations.of(context)!;
         return ListView(
           padding: EdgeInsets.fromLTRB(
             12,
@@ -349,18 +354,18 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 20),
             SettingsGroup(
-              title: 'General',
+              title: l10n.settingsGeneral,
               options: <Widget>[
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.notifications_outlined),
                   title: Text(
-                    'Notifications',
+                    l10n.settingsNotificationsTitle,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Reminders & alerts',
+                    l10n.settingsNotificationsSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
@@ -378,86 +383,83 @@ class _SettingsPageState extends State<SettingsPage> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.language_rounded),
                   title: Text(
-                    'Language',
+                    AppLocalizations.of(context)!.settingsLanguage,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'App display language',
+                    AppLocalizations.of(context)!.settingsLanguageSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  onTap: () => _snack(
-                    context,
-                    'Language options will be available soon.',
-                  ),
+                  onTap: () => showAppLanguagePicker(context),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SettingsGroup(
-              title: 'Account',
+              title: l10n.settingsAccountGroup,
               options: <Widget>[
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.privacy_tip_outlined),
                   title: Text(
-                    'Privacy',
+                    l10n.settingsPrivacy,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Data & visibility',
+                    l10n.settingsPrivacySubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  onTap: () => _snack(context, 'Privacy settings'),
+                  onTap: () => _snack(context, l10n.settingsSnackPrivacy),
                 ),
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.shield_outlined),
                   title: Text(
-                    'Security',
+                    l10n.settingsSecurity,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Devices & sign-in',
+                    l10n.settingsSecuritySubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  onTap: () => _snack(context, 'Security settings'),
+                  onTap: () => _snack(context, l10n.settingsSnackSecurity),
                 ),
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.lock_outline_rounded),
                   title: Text(
-                    'Change password',
+                    l10n.settingsChangePassword,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Update your password',
+                    l10n.settingsChangePasswordSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  onTap: () => _snack(context, 'Change password'),
+                  onTap: () => _snack(context, l10n.settingsSnackChangePassword),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             SettingsGroup(
-              title: 'Data & sharing',
+              title: l10n.settingsDataSharing,
               options: <Widget>[
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.import_export_rounded),
                   title: Text(
-                    'Export / import',
+                    l10n.settingsExportImport,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Backup your progress',
+                    l10n.settingsExportImportSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
@@ -475,11 +477,11 @@ class _SettingsPageState extends State<SettingsPage> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.share_rounded),
                   title: Text(
-                    'Share city',
+                    l10n.settingsShareCity,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Post your city to social',
+                    l10n.settingsShareCitySubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
@@ -495,18 +497,18 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
             const SizedBox(height: 16),
             SettingsGroup(
-              title: 'About',
+              title: l10n.settingsAbout,
               options: <Widget>[
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.info_outline_rounded),
                   title: Text(
-                    'Version',
+                    l10n.settingsVersion,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Build & updates',
+                    l10n.settingsVersionSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Container(
@@ -516,31 +518,31 @@ class _SettingsPageState extends State<SettingsPage> {
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: Colors.grey.shade200),
                     ),
-                    child: const Text(
-                      '1.0.0',
-                      style: TextStyle(
+                    child: Text(
+                      l10n.buildVersionLabel,
+                      style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         color: _kBrandGreen,
                         fontSize: 13,
                       ),
                     ),
                   ),
-                  onTap: () => _snack(context, 'Build 1.0.0'),
+                  onTap: () => _snack(context, l10n.settingsSnackBuild),
                 ),
                 ListTile(
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   leading: const SettingsLeadingIcon(icon: Icons.help_outline_rounded),
                   title: Text(
-                    'Help & support',
+                    l10n.settingsHelpSupport,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'FAQs & contact',
+                    l10n.settingsHelpSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
-                  onTap: () => _snack(context, 'Help & support'),
+                  onTap: () => _snack(context, l10n.settingsSnackHelp),
                 ),
               ],
             ),
@@ -556,9 +558,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                 ),
                 icon: const Icon(Icons.logout_rounded, size: 22),
-                label: const Text(
-                  'Sign out',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                label: Text(
+                  l10n.signOutLabel,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
             const SizedBox(height: 12),
@@ -579,9 +581,9 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         backgroundColor: appBarColor,
         elevation: 0,
-        title: const Text(
-          'Settings',
-          style: TextStyle(
+        title: Text(
+          AppLocalizations.of(context)!.settingsPageTitle,
+          style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w800,
           ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 /// Privacy policy copy used by sign-up flow.
 class PrivacyPolicyScreen extends StatelessWidget {
@@ -8,20 +9,21 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: _bg,
       appBar: AppBar(
         backgroundColor: _bg,
         elevation: 0,
         foregroundColor: Colors.black87,
-        title: const Text('Privacy policy'),
+        title: Text(l10n.privacyPolicyTitle),
       ),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
           children: <Widget>[
             Text(
-              'Last updated',
+              l10n.lastUpdatedLabel,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -30,27 +32,18 @@ class PrivacyPolicyScreen extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             _Section(
-              title: 'What we collect',
-              body:
-                  'We collect information you provide in the app, such as '
-                  'account email, mood logs, and focus session records, to '
-                  'support core features and improve your experience.',
+              title: l10n.privacyWhatWeCollectTitle,
+              body: l10n.privacyWhatWeCollectBody,
             ),
             const SizedBox(height: 20),
             _Section(
-              title: 'How we use it',
-              body:
-                  'Your data is used to show your dashboard, help sync your '
-                  'experience across supported devices, and maintain app '
-                  'features related to productivity and wellbeing.',
+              title: l10n.privacyHowWeUseItTitle,
+              body: l10n.privacyHowWeUseItBody,
             ),
             const SizedBox(height: 20),
             _Section(
-              title: 'Your choices',
-              body:
-                  'You can export or delete data from Settings when those '
-                  'screens are wired. This page exists so the sign-up checkbox '
-                  'has somewhere to link.',
+              title: l10n.privacyYourChoicesTitle,
+              body: l10n.privacyYourChoicesBody,
             ),
           ],
         ),

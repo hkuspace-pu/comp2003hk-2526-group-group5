@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
+import '../../widgets/language_switcher.dart';
 import 'staff_login_screen.dart';
 import 'staff_signup_screen.dart';
 import 'staff_theme.dart';
 
-/// Entry screen for Staff (專員) — separate from the student welcome flow.
+/// Entry screen for Staff (員工) — separate from the student welcome flow.
 class StaffWelcomeScreen extends StatelessWidget {
   const StaffWelcomeScreen({super.key});
 
@@ -27,6 +29,7 @@ class StaffWelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: StaffTheme.background,
@@ -41,9 +44,17 @@ class StaffWelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const SizedBox(height: 24),
+                      Row(
+                        children: <Widget>[
+                          AppLanguageIconButton(
+                            iconColor: StaffTheme.primary,
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Text(
-                        'Staff portal',
+                        l10n.staffPortalTitle,
                         textAlign: TextAlign.center,
                         style: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -53,7 +64,7 @@ class StaffWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '專員專用 · 管理與檢視使用者資料',
+                        l10n.staffPortalSubtitle,
                         textAlign: TextAlign.center,
                         style: textTheme.titleSmall?.copyWith(
                           color: StaffTheme.primary.withValues(alpha: 0.75),
@@ -63,7 +74,7 @@ class StaffWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Sign in with your staff account to open the dashboard and user directory.',
+                        l10n.staffPortalBody,
                         textAlign: TextAlign.center,
                         style: textTheme.bodyMedium?.copyWith(
                           color: Colors.black54,
@@ -96,17 +107,17 @@ class StaffWelcomeScreen extends StatelessWidget {
                       const SizedBox(height: 20),
                       _Bullet(
                         icon: Icons.dashboard_customize_outlined,
-                        text: 'Overview: engagement and focus trends',
+                        text: l10n.staffBullet1,
                       ),
                       const SizedBox(height: 10),
                       _Bullet(
                         icon: Icons.groups_outlined,
-                        text: 'User directory: search and open profiles',
+                        text: l10n.staffBullet2,
                       ),
                       const SizedBox(height: 10),
                       _Bullet(
                         icon: Icons.lock_outline_rounded,
-                        text: 'Restricted to authorised staff accounts',
+                        text: l10n.staffBullet3,
                       ),
                       const Spacer(),
                       const SizedBox(height: 32),
@@ -123,9 +134,9 @@ class StaffWelcomeScreen extends StatelessWidget {
                             elevation: 4,
                             shadowColor: StaffTheme.primary.withValues(alpha: 0.35),
                           ),
-                          child: const Text(
-                            'Sign in',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.signIn,
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                             ),
@@ -147,9 +158,9 @@ class StaffWelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Sign up',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.signUp,
+                            style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
                             ),
@@ -160,7 +171,7 @@ class StaffWelcomeScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () => Navigator.of(context).maybePop(),
                         child: Text(
-                          'Back to student app',
+                          l10n.backToStudentApp,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: StaffTheme.accent,

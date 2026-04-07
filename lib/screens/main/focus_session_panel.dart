@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../focus_city_layout.dart';
@@ -20,6 +21,7 @@ class FocusSessionPanel extends StatefulWidget {
 class _FocusSessionPanelState extends State<FocusSessionPanel> {
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final FocusSessionData fd = context.watch<FocusSessionData>();
     final TextTheme textTheme = Theme.of(context).textTheme;
     final bool c = widget.compact;
@@ -70,7 +72,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        'Focus session',
+                        l10n.focusSessionTitle,
                         style: (c ? textTheme.labelLarge : textTheme.titleSmall)
                             ?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -80,7 +82,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                       Padding(
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
-                          '${fd.targetMinutes} min',
+                          l10n.focusMinutesValue(fd.targetMinutes),
                           style: TextStyle(
                             fontSize: c ? 11 : 12,
                             fontWeight: FontWeight.w600,
@@ -93,7 +95,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                 ),
                 if (!running)
                   IconButton(
-                    tooltip: 'Edit length',
+                    tooltip: l10n.editLengthTooltip,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(
                       minWidth: 40,
@@ -126,7 +128,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                         }
                       : null,
                   icon: Icon(Icons.play_arrow_rounded, size: c ? 19 : 20),
-                  label: Text('Start', style: TextStyle(fontSize: c ? 13 : 14)),
+                  label: Text(l10n.startLabel, style: TextStyle(fontSize: c ? 13 : 14)),
                   style: FilledButton.styleFrom(
                     backgroundColor: _kGreen,
                     foregroundColor: Colors.white,
@@ -162,7 +164,9 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                     size: c ? 18 : 20,
                   ),
                   label: Text(
-                    running ? 'Pause' : (canResume ? 'Resume' : 'Pause'),
+                    running
+                        ? l10n.pauseLabel
+                        : (canResume ? l10n.resumeLabel : l10n.pauseLabel),
                     style: TextStyle(fontSize: c ? 13 : 14),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -193,8 +197,8 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                                   FocusCityLayout.radius(c),
                                 ),
                               ),
-                              content: const Text(
-                                'Session ended early (no completion XP).',
+                              content: Text(
+                                l10n.sessionEndedEarlyNoXp,
                               ),
                             ),
                           );
@@ -202,7 +206,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                       : null,
                   icon: Icon(Icons.flag_rounded, size: c ? 18 : 20),
                   label: Text(
-                    'Finish',
+                    l10n.finishLabel,
                     style: TextStyle(fontSize: c ? 13 : 14),
                   ),
                   style: FilledButton.styleFrom(
@@ -251,6 +255,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
   }
 
   Future<void> _showEditTimerDialog(BuildContext context, int current) async {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     final FocusSessionData session = context.read<FocusSessionData>();
     final TextEditingController controller =
         TextEditingController(text: '$current');
@@ -258,13 +263,13 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
       context: context,
       builder: (BuildContext ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Edit focus length'),
+        title: Text(l10n.editFocusLength),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              'Set session length in minutes (1–180).',
+              l10n.setSessionLengthHint,
               style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
             ),
             const SizedBox(height: 12),
@@ -276,9 +281,9 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
                 FilteringTextInputFormatter.digitsOnly,
               ],
               decoration: InputDecoration(
-                labelText: 'Minutes',
-                suffixText: 'min',
-                hintText: '1–180',
+                labelText: l10n.minutesLabel,
+                suffixText: l10n.minSuffix,
+                hintText: l10n.minutesRangeHint,
                 border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
               ),
               onSubmitted: (_) => Navigator.of(ctx).pop(),
@@ -288,7 +293,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           FilledButton(
             onPressed: () {
@@ -299,7 +304,7 @@ class _FocusSessionPanelState extends State<FocusSessionPanel> {
               Navigator.of(ctx).pop();
             },
             style: FilledButton.styleFrom(backgroundColor: _kGreen),
-            child: const Text('Apply'),
+            child: Text(l10n.applyLabel),
           ),
         ],
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../app_colors.dart';
 import '../../Gamification.dart';
@@ -10,12 +11,13 @@ class FocusCityTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: kMainShellBackground,
       child: FocusCityBody(
         compact: true,
-        progressTitle: "TODAY'S CITY PROGRESS",
-        progressSubtitle: 'Build your city with each focus session',
+        progressTitle: l10n.focusCityProgressTitle,
+        progressSubtitle: l10n.focusCityProgressSubtitle,
         showBottomStartStopButton: false,
         sessionToolbar: FocusSessionPanel(compact: true),
       ),

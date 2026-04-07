@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../Setting.dart';
@@ -12,15 +13,16 @@ class AccountDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kMainShellBackground,
       appBar: AppBar(
         backgroundColor: _kBrandGreen,
         elevation: 0,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Account',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          l10n.accountPageTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         centerTitle: true,
       ),
@@ -28,7 +30,7 @@ class AccountDetailPage extends StatelessWidget {
         builder: (BuildContext context, UserProvider up, _) {
           final User? u = up.currentUser;
           if (u == null) {
-            return const Center(child: Text('No account loaded'));
+            return Center(child: Text(l10n.accountNoUser));
           }
           return ListView(
             padding: const EdgeInsets.all(20),
@@ -77,7 +79,7 @@ class AccountDetailPage extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Profile editing and linked sign-in methods can ship in a later build.',
+                    l10n.accountPlaceholderBody,
                     style: TextStyle(color: Colors.grey.shade700, height: 1.4),
                   ),
                 ),
@@ -104,15 +106,16 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kMainShellBackground,
       appBar: AppBar(
         backgroundColor: _kBrandGreen,
         elevation: 0,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Notifications',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          l10n.notificationsPageTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         centerTitle: true,
       ),
@@ -129,12 +132,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             child: Column(
               children: <Widget>[
                 SwitchListTile(
-                  title: const Text(
-                    'Focus session reminders',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  title: Text(
+                    l10n.notificationFocusReminders,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'Nudge before a scheduled session',
+                    l10n.notificationFocusRemindersSubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   value: _sessionReminders,
@@ -143,12 +146,12 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 ),
                 Divider(height: 1, color: Colors.grey.shade100),
                 SwitchListTile(
-                  title: const Text(
-                    'Weekly summary',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+                  title: Text(
+                    l10n.notificationWeeklySummary,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                   subtitle: Text(
-                    'XP and streak highlights',
+                    l10n.notificationWeeklySummarySubtitle,
                     style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
                   value: _weeklySummary,
@@ -160,7 +163,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            'System permission for alerts is still required on device builds.',
+            l10n.notificationPermissionNote,
             style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
@@ -174,15 +177,16 @@ class ExportImportPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kMainShellBackground,
       appBar: AppBar(
         backgroundColor: _kBrandGreen,
         elevation: 0,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Export / import',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          l10n.exportImportPageTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         centerTitle: true,
       ),
@@ -201,8 +205,7 @@ class ExportImportPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Back up your city layout and progress to a file, or restore from a backup. '
-                  'File I/O will be wired when persistence is finalized.',
+                  l10n.exportImportBody,
                   style: TextStyle(color: Colors.grey.shade700, height: 1.4),
                 ),
               ),
@@ -211,7 +214,7 @@ class ExportImportPage extends StatelessWidget {
             FilledButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Export started')),
+                  SnackBar(content: Text(l10n.exportStarted)),
                 );
               },
               style: FilledButton.styleFrom(
@@ -223,13 +226,13 @@ class ExportImportPage extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.upload_file_rounded),
-              label: const Text('Export backup', style: TextStyle(fontWeight: FontWeight.w700)),
+              label: Text(l10n.exportBackupButton, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
             const SizedBox(height: 12),
             OutlinedButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Import started')),
+                  SnackBar(content: Text(l10n.importStarted)),
                 );
               },
               style: OutlinedButton.styleFrom(
@@ -241,7 +244,7 @@ class ExportImportPage extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.download_rounded),
-              label: const Text('Import backup', style: TextStyle(fontWeight: FontWeight.w700)),
+              label: Text(l10n.importBackupButton, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ],
         ),
@@ -255,15 +258,16 @@ class ShareCityPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: kMainShellBackground,
       appBar: AppBar(
         backgroundColor: _kBrandGreen,
         elevation: 0,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Share city',
-          style: TextStyle(fontWeight: FontWeight.w800),
+        title: Text(
+          l10n.shareCityPageTitle,
+          style: const TextStyle(fontWeight: FontWeight.w800),
         ),
         centerTitle: true,
       ),
@@ -282,8 +286,7 @@ class ShareCityPage extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Text(
-                  'Share a snapshot or invite friends to see your Focus City. '
-                  'Native share sheet integration can be added for mobile.',
+                  l10n.shareCityBody,
                   style: TextStyle(color: Colors.grey.shade700, height: 1.4),
                 ),
               ),
@@ -292,7 +295,7 @@ class ShareCityPage extends StatelessWidget {
             FilledButton.icon(
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Share opened')),
+                  SnackBar(content: Text(l10n.shareOpened)),
                 );
               },
               style: FilledButton.styleFrom(
@@ -304,7 +307,7 @@ class ShareCityPage extends StatelessWidget {
                 ),
               ),
               icon: const Icon(Icons.ios_share_rounded),
-              label: const Text('Share', style: TextStyle(fontWeight: FontWeight.w700)),
+              label: Text(l10n.shareButton, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ],
         ),

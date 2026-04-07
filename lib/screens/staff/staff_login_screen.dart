@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import 'staff_shell_screen.dart';
 import 'staff_signup_screen.dart';
@@ -53,13 +54,13 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter work email and password.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterWorkEmailPassword)),
       );
       return;
     }
     if (!_looksLikeEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid-looking email.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterValidEmail)),
       );
       return;
     }
@@ -80,7 +81,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
     _emailController.text = kStaffDemoLoginEmail;
     _passwordController.text = kStaffDemoLoginPassword;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Email and password filled.')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.msgEmailPasswordFilled)),
     );
   }
 
@@ -100,6 +101,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: StaffTheme.background,
       appBar: AppBar(
@@ -107,7 +109,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
         foregroundColor: StaffTheme.primary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Sign in'),
+        title: Text(l10n.staffLoginTitle),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -121,7 +123,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
                       Text(
-                        'Work account',
+                        l10n.staffWorkAccountTitle,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                               color: StaffTheme.primary,
@@ -129,7 +131,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Use your staff email to access the dashboard and user directory.',
+                        l10n.staffWorkAccountHint,
                         style: TextStyle(
                           color: Colors.grey.shade700,
                           height: 1.4,
@@ -166,7 +168,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    'Demo staff account',
+                                    l10n.staffDemoAccountTitle,
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w700,
@@ -177,7 +179,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                'One tap to fill the demo credentials, or quick sign in.',
+                                l10n.staffDemoAccountHint,
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: Colors.grey.shade600,
@@ -219,8 +221,8 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                                         ),
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
-                                      child: const Text(
-                                        'Fill fields',
+                                      child: Text(
+                                        l10n.fillFields,
                                         style: TextStyle(fontWeight: FontWeight.w600),
                                       ),
                                     ),
@@ -237,8 +239,8 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                                         ),
                                         padding: const EdgeInsets.symmetric(vertical: 12),
                                       ),
-                                      child: const Text(
-                                        'Quick sign in',
+                                      child: Text(
+                                        l10n.quickSignIn,
                                         style: TextStyle(fontWeight: FontWeight.w600),
                                       ),
                                     ),
@@ -255,7 +257,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                         keyboardType: TextInputType.emailAddress,
                         autocorrect: false,
                         decoration: InputDecoration(
-                          labelText: 'Work email',
+                          labelText: l10n.staffWorkEmailLabel,
                           filled: true,
                           fillColor: StaffTheme.surface,
                           border: OutlineInputBorder(
@@ -268,7 +270,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                         controller: _passwordController,
                         obscureText: true,
                         decoration: InputDecoration(
-                          labelText: 'Password',
+                          labelText: l10n.passwordLabel,
                           filled: true,
                           fillColor: StaffTheme.surface,
                           border: OutlineInputBorder(
@@ -287,8 +289,8 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Continue',
+                        child: Text(
+                          l10n.continueLabel,
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
@@ -308,8 +310,8 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: const Text(
-                          'Sign up',
+                        child: Text(
+                          l10n.signUp,
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                       ),

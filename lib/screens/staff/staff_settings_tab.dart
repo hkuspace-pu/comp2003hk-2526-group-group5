@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../main_shell_insets.dart';
+import '../../widgets/language_switcher.dart';
 import 'staff_theme.dart';
 
 class StaffSettingsTab extends StatefulWidget {
@@ -36,6 +38,7 @@ class _StaffSettingsTabState extends State<StaffSettingsTab> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: StaffTheme.background,
       child: ListView(
@@ -47,62 +50,77 @@ class _StaffSettingsTabState extends State<StaffSettingsTab> {
           ),
           const SizedBox(height: 14),
           _SectionCard(
-            title: 'Preferences',
+            title: l10n.staffSettingsPreferences,
             children: <Widget>[
+              ListTile(
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14),
+                leading: _LeadingIcon(icon: Icons.language_rounded),
+                title: Text(
+                  AppLocalizations.of(context)!.settingsLanguage,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(
+                  AppLocalizations.of(context)!.settingsLanguageSubtitle,
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                ),
+                trailing: Icon(Icons.chevron_right_rounded, color: Colors.grey.shade400),
+                onTap: () => showAppLanguagePicker(context),
+              ),
+              Divider(height: 1, color: Colors.grey.shade200),
               SwitchListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 value: _notifications,
-                activeColor: StaffTheme.primary,
-                title: const Text('Push notifications'),
-                subtitle: const Text('Receive account and system alerts.'),
+                activeThumbColor: StaffTheme.primary,
+                title: Text(l10n.staffPushNotifications),
+                subtitle: Text(l10n.staffPushNotificationsSubtitle),
                 onChanged: (bool v) => setState(() => _notifications = v),
               ),
               Divider(height: 1, color: Colors.grey.shade200),
               SwitchListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 value: _weeklyDigest,
-                activeColor: StaffTheme.primary,
-                title: const Text('Weekly digest email'),
-                subtitle: const Text('Summary of user activity and trends.'),
+                activeThumbColor: StaffTheme.primary,
+                title: Text(l10n.staffWeeklyDigestEmail),
+                subtitle: Text(l10n.staffWeeklyDigestEmailSubtitle),
                 onChanged: (bool v) => setState(() => _weeklyDigest = v),
               ),
               Divider(height: 1, color: Colors.grey.shade200),
               SwitchListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 14),
                 value: _compactRows,
-                activeColor: StaffTheme.primary,
-                title: const Text('Compact user list'),
-                subtitle: const Text('Display denser rows in User directory.'),
+                activeThumbColor: StaffTheme.primary,
+                title: Text(l10n.staffCompactUserList),
+                subtitle: Text(l10n.staffCompactUserListSubtitle),
                 onChanged: (bool v) => setState(() => _compactRows = v),
               ),
             ],
           ),
           const SizedBox(height: 14),
           _SectionCard(
-            title: 'Support',
+            title: l10n.staffSupportSection,
             children: <Widget>[
               ListTile(
                 leading: _LeadingIcon(icon: Icons.help_outline_rounded),
-                title: const Text('Help center'),
-                subtitle: const Text('Guides for Staff workflows.'),
+                title: Text(l10n.staffHelpCenter),
+                subtitle: Text(l10n.staffHelpCenterSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => _snack('Help center'),
+                onTap: () => _snack(l10n.staffHelpCenter),
               ),
               Divider(height: 1, color: Colors.grey.shade200),
               ListTile(
                 leading: _LeadingIcon(icon: Icons.privacy_tip_outlined),
-                title: const Text('Privacy & data policy'),
-                subtitle: const Text('Review data handling and access scope.'),
+                title: Text(l10n.staffPrivacyDataPolicy),
+                subtitle: Text(l10n.staffPrivacyDataPolicySubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => _snack('Privacy & data policy'),
+                onTap: () => _snack(l10n.staffPrivacyDataPolicy),
               ),
               Divider(height: 1, color: Colors.grey.shade200),
               ListTile(
                 leading: _LeadingIcon(icon: Icons.mail_outline_rounded),
-                title: const Text('Contact administrator'),
-                subtitle: const Text('Report access or data issues.'),
+                title: Text(l10n.staffContactAdministrator),
+                subtitle: Text(l10n.staffContactAdministratorSubtitle),
                 trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () => _snack('Contact administrator'),
+                onTap: () => _snack(l10n.staffContactAdministrator),
               ),
             ],
           ),
@@ -118,8 +136,8 @@ class _StaffSettingsTabState extends State<StaffSettingsTab> {
               ),
             ),
             icon: const Icon(Icons.logout_rounded),
-            label: const Text(
-              'Sign out',
+            label: Text(
+              l10n.signOutLabel,
               style: TextStyle(fontWeight: FontWeight.w700),
             ),
           ),
@@ -186,7 +204,7 @@ class _AccountCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Role: Staff',
+                    AppLocalizations.of(context)!.staffRoleLabel,
                     style: TextStyle(
                       fontSize: 12,
                       color: StaffTheme.primaryLight,

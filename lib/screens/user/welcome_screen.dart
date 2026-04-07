@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../Login.dart';
 import '../../Register.dart';
+import '../../widgets/language_switcher.dart';
 import '../staff/staff_welcome_screen.dart';
 
 const Color _kWelcomeBg = Color(0xFFF8F8EC);
@@ -43,6 +45,7 @@ class UserWelcomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: _kWelcomeBg,
@@ -57,9 +60,17 @@ class UserWelcomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: <Widget>[
-                      const SizedBox(height: 24),
+                      Row(
+                        children: <Widget>[
+                          AppLanguageIconButton(
+                            iconColor: _kTitleBlue.withValues(alpha: 0.85),
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
                       Text(
-                        'Welcome',
+                        l10n.welcomeTitle,
                         textAlign: TextAlign.center,
                         style: textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.w800,
@@ -69,7 +80,7 @@ class UserWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Grow your focus. Build your city.',
+                        l10n.welcomeSubtitle,
                         textAlign: TextAlign.center,
                         style: textTheme.titleMedium?.copyWith(
                           color: Colors.black54,
@@ -109,7 +120,7 @@ class UserWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 28),
                       Text(
-                        'Screen time: Build your city',
+                        l10n.welcomeTagline,
                         textAlign: TextAlign.center,
                         style: textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.w700,
@@ -120,17 +131,17 @@ class UserWelcomeScreen extends StatelessWidget {
                       const SizedBox(height: 16),
                       _Bullet(
                         icon: Icons.timer_outlined,
-                        text: 'Stay on task with focus sessions',
+                        text: l10n.bulletFocus,
                       ),
                       const SizedBox(height: 10),
                       _Bullet(
                         icon: Icons.mood_outlined,
-                        text: 'Log mood and see your patterns',
+                        text: l10n.bulletMood,
                       ),
                       const SizedBox(height: 10),
                       _Bullet(
                         icon: Icons.dashboard_customize_outlined,
-                        text: 'Track progress on your dashboard',
+                        text: l10n.bulletDashboard,
                       ),
                       const Spacer(),
                       const SizedBox(height: 32),
@@ -147,9 +158,9 @@ class UserWelcomeScreen extends StatelessWidget {
                             elevation: 4,
                             shadowColor: _kAccentGreen.withValues(alpha: 0.45),
                           ),
-                          child: const Text(
-                            'Sign in',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.signIn,
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                             ),
@@ -171,9 +182,9 @@ class UserWelcomeScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(14),
                             ),
                           ),
-                          child: const Text(
-                            'Sign up',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.signUp,
+                            style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,
                             ),
@@ -182,7 +193,7 @@ class UserWelcomeScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       Text(
-                        'New here? Create an account to save your city and stats.',
+                        l10n.welcomeFooter,
                         textAlign: TextAlign.center,
                         style: textTheme.bodySmall?.copyWith(
                           color: Colors.black45,
@@ -193,7 +204,7 @@ class UserWelcomeScreen extends StatelessWidget {
                       TextButton(
                         onPressed: () => _openStaffPortal(context),
                         child: Text(
-                          'Staff portal · 專員入口',
+                          l10n.staffPortalLink,
                           style: TextStyle(
                             fontWeight: FontWeight.w700,
                             color: _kTitleBlue,

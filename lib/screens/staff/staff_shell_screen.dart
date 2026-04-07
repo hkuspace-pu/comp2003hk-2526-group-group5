@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../responsive_shell.dart';
 import 'staff_dashboard_tab.dart';
@@ -6,7 +7,7 @@ import 'staff_settings_tab.dart';
 import 'staff_theme.dart';
 import 'staff_user_list_tab.dart';
 
-/// Staff shell: overview + user directory (專員專用).
+/// Staff shell: overview + user directory (員工專用).
 class StaffShellScreen extends StatefulWidget {
   const StaffShellScreen({
     super.key,
@@ -24,22 +25,17 @@ class StaffShellScreen extends StatefulWidget {
 class _StaffShellScreenState extends State<StaffShellScreen> {
   int _index = 0;
 
-  static const List<String> _titles = <String>[
-    'Staff overview',
-    'User directory',
-    'Settings',
-  ];
-
   void _confirmSignOut(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('You will return to the welcome screen.'),
+        title: Text(l10n.signOutConfirmTitle),
+        content: Text(l10n.signOutConfirmBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           FilledButton(
             onPressed: () {
@@ -50,7 +46,7 @@ class _StaffShellScreenState extends State<StaffShellScreen> {
               backgroundColor: StaffTheme.primary,
               foregroundColor: StaffTheme.onPrimary,
             ),
-            child: const Text('Sign out'),
+            child: Text(l10n.signOutLabel),
           ),
         ],
       ),
@@ -59,6 +55,12 @@ class _StaffShellScreenState extends State<StaffShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final List<String> titles = <String>[
+      l10n.staffOverviewTitle,
+      l10n.staffUserDirectoryTitle,
+      l10n.settingsLabel,
+    ];
     final ThemeData base = Theme.of(context);
     return Theme(
       data: base.copyWith(
@@ -75,11 +77,11 @@ class _StaffShellScreenState extends State<StaffShellScreen> {
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
-          title: Text(_titles[_index]),
+          title: Text(titles[_index]),
           actions: <Widget>[
             IconButton(
               icon: const Icon(Icons.logout_rounded),
-              tooltip: 'Sign out',
+              tooltip: l10n.signOutLabel,
               onPressed: () => _confirmSignOut(context),
             ),
           ],
@@ -93,11 +95,11 @@ class _StaffShellScreenState extends State<StaffShellScreen> {
                 staffEmail: widget.staffEmail,
               ),
               const StaffUserListTab(),
-            StaffSettingsTab(
-              staffDisplayName: widget.staffDisplayName,
-              staffEmail: widget.staffEmail,
-              onSignOutRequested: () => _confirmSignOut(context),
-            ),
+              StaffSettingsTab(
+                staffDisplayName: widget.staffDisplayName,
+                staffEmail: widget.staffEmail,
+                onSignOutRequested: () => _confirmSignOut(context),
+              ),
             ],
           ),
         ),
@@ -109,21 +111,21 @@ class _StaffShellScreenState extends State<StaffShellScreen> {
           indicatorColor: StaffTheme.primary.withValues(alpha: 0.12),
           selectedIndex: _index,
           onDestinationSelected: (int i) => setState(() => _index = i),
-          destinations: const <NavigationDestination>[
+          destinations: <NavigationDestination>[
             NavigationDestination(
-              icon: Icon(Icons.dashboard_outlined),
-              selectedIcon: Icon(Icons.dashboard),
-              label: 'Dashboard',
+              icon: const Icon(Icons.dashboard_outlined),
+              selectedIcon: const Icon(Icons.dashboard),
+              label: l10n.dashboardLabel,
             ),
             NavigationDestination(
-              icon: Icon(Icons.people_outline_rounded),
-              selectedIcon: Icon(Icons.people),
-              label: 'Users',
+              icon: const Icon(Icons.people_outline_rounded),
+              selectedIcon: const Icon(Icons.people),
+              label: l10n.usersLabel,
             ),
             NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              selectedIcon: Icon(Icons.settings),
-              label: 'Settings',
+              icon: const Icon(Icons.settings_outlined),
+              selectedIcon: const Icon(Icons.settings),
+              label: l10n.settingsLabel,
             ),
           ],
         ),

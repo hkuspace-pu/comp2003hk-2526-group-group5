@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'Login.dart';
@@ -62,10 +63,11 @@ class SignUpScreen extends StatelessWidget {
 
   void _handleSignUp(BuildContext context, SignUpData signUpData) {
     if (!signUpData.privacyPolicyAccepted) {
+      final AppLocalizations l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the privacy policy to sign up.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(l10n.msgAcceptPrivacy),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -78,21 +80,21 @@ class SignUpScreen extends StatelessWidget {
 
     if (userName.isEmpty || email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgFillAllFields)),
       );
       return;
     }
     if (!_looksLikeEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid-looking email.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterValidEmail)),
       );
       return;
     }
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Passwords do not match.'),
-          duration: Duration(seconds: 2),
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.msgPasswordMismatch),
+          duration: const Duration(seconds: 2),
         ),
       );
       return;
@@ -107,6 +109,7 @@ class SignUpScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
       body: SafeArea(
@@ -126,8 +129,8 @@ class SignUpScreen extends StatelessWidget {
                     ),
                   ),
                   // Title
-                  const Text(
-                    'Sign Up',
+                  Text(
+                    l10n.signUp,
                     style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
@@ -137,7 +140,7 @@ class SignUpScreen extends StatelessWidget {
                   const SizedBox(height: 32),
 
                   Text(
-                    'Please login or sign up to continue using our app',
+                    l10n.authContinueHint,
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.grey[600],
@@ -147,7 +150,7 @@ class SignUpScreen extends StatelessWidget {
                   const SizedBox(height: 40),
 
                   // User Name field
-                  const Text('User Name',
+                  Text(l10n.userNameLabel,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -157,7 +160,7 @@ class SignUpScreen extends StatelessWidget {
                     controller: signUpData.userNameController,
                     keyboardType: TextInputType.text,
                     decoration: InputDecoration(
-                      hintText: 'Enter your user name',
+                      hintText: l10n.enterUserNameHint,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       filled: true,
                       fillColor: Colors.white,
@@ -181,7 +184,7 @@ class SignUpScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Email field
-                  const Text('Email',
+                  Text(l10n.emailLabel,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -191,7 +194,7 @@ class SignUpScreen extends StatelessWidget {
                     controller: signUpData.emailController,
                     keyboardType: TextInputType.emailAddress,
                     decoration: InputDecoration(
-                      hintText: 'Enter your email',
+                      hintText: l10n.enterEmailHint,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       filled: true,
                       fillColor: Colors.white,
@@ -215,7 +218,7 @@ class SignUpScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Password field
-                  const Text('Password',
+                  Text(l10n.passwordLabel,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -226,7 +229,7 @@ class SignUpScreen extends StatelessWidget {
                     obscureText: !signUpData.isPasswordVisible,
                     keyboardType: TextInputType.visiblePassword,
                     decoration: InputDecoration(
-                      hintText: 'Enter your password',
+                      hintText: l10n.enterPasswordHint,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       filled: true,
                       fillColor: Colors.white,
@@ -259,7 +262,7 @@ class SignUpScreen extends StatelessWidget {
                   const SizedBox(height: 24),
 
                   // Confirm Password field
-                  const Text('Confirm Password',
+                  Text(l10n.confirmPasswordLabel,
                       style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w500,
@@ -270,7 +273,7 @@ class SignUpScreen extends StatelessWidget {
                     obscureText: !signUpData.isConfirmPasswordVisible,
                     keyboardType: TextInputType.visiblePassword,
                     decoration: InputDecoration(
-                      hintText: 'Confirm your password',
+                      hintText: l10n.confirmPasswordHint,
                       hintStyle: TextStyle(color: Colors.grey[400]),
                       filled: true,
                       fillColor: Colors.white,
@@ -332,7 +335,7 @@ class SignUpScreen extends StatelessWidget {
                               child: Padding(
                                 padding: const EdgeInsets.only(top: 10),
                                 child: Text(
-                                  'I agree with the privacy policy',
+                                  l10n.agreePrivacyPolicy,
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.grey[700],
@@ -355,8 +358,8 @@ class SignUpScreen extends StatelessWidget {
                                   ),
                                 );
                               },
-                              child: const Text(
-                                'Read full policy',
+                              child: Text(
+                                l10n.readFullPolicy,
                                 style: TextStyle(
                                   color: Color(0xFF46AA57),
                                   fontWeight: FontWeight.w600,
@@ -384,8 +387,8 @@ class SignUpScreen extends StatelessWidget {
                         ),
                         elevation: 4,
                       ),
-                      child: const Text(
-                        'Sign up',
+                      child: Text(
+                        l10n.signUp,
                         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                       ),
                     ),
@@ -397,7 +400,7 @@ class SignUpScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: <Widget>[
                       Text(
-                        "You already have an account? ",
+                        l10n.haveAccountPrompt,
                         style: TextStyle(color: Colors.grey[600]),
                       ),
                       GestureDetector(
@@ -409,8 +412,8 @@ class SignUpScreen extends StatelessWidget {
                             ),
                           );
                         },
-                        child: const Text(
-                          'Login',
+                        child: Text(
+                          l10n.loginButton,
                           style: TextStyle(
                             color: Color(0xFF3CB371),
                             fontWeight: FontWeight.w600,

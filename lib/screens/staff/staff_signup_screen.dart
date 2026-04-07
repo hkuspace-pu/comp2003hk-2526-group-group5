@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import 'staff_shell_screen.dart';
 import 'staff_theme.dart';
@@ -51,25 +52,25 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
 
     if (name.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill in all fields.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgFillAllFields)),
       );
       return;
     }
     if (!_looksLikeEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid-looking email.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterValidEmail)),
       );
       return;
     }
     if (password != confirmPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgPasswordMismatch)),
       );
       return;
     }
     if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept staff account terms.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgAcceptStaffTerms)),
       );
       return;
     }
@@ -95,6 +96,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: StaffTheme.background,
       appBar: AppBar(
@@ -102,7 +104,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
         foregroundColor: StaffTheme.primary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        title: const Text('Sign up'),
+        title: Text(l10n.signUp),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -111,7 +113,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               Text(
-                'Staff account',
+                l10n.staffAccountTitle,
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       fontWeight: FontWeight.w800,
                       color: StaffTheme.primary,
@@ -119,7 +121,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Register to access overview, user directory, and settings.',
+                l10n.staffRegisterHint,
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontSize: 14,
@@ -130,21 +132,21 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
               TextField(
                 controller: _nameController,
                 textInputAction: TextInputAction.next,
-                decoration: _inputDecoration('Full name'),
+                decoration: _inputDecoration(l10n.fullNameLabel),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
-                decoration: _inputDecoration('Work email'),
+                decoration: _inputDecoration(l10n.staffWorkEmailLabel),
               ),
               const SizedBox(height: 16),
               TextField(
                 controller: _passwordController,
                 obscureText: !_showPassword,
                 textInputAction: TextInputAction.next,
-                decoration: _inputDecoration('Password').copyWith(
+                decoration: _inputDecoration(l10n.passwordLabel).copyWith(
                   suffixIcon: IconButton(
                     icon: Icon(_showPassword ? Icons.visibility : Icons.visibility_off),
                     onPressed: () => setState(() => _showPassword = !_showPassword),
@@ -155,7 +157,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
               TextField(
                 controller: _confirmPasswordController,
                 obscureText: !_showConfirmPassword,
-                decoration: _inputDecoration('Confirm password').copyWith(
+                decoration: _inputDecoration(l10n.confirmPasswordLabel).copyWith(
                   suffixIcon: IconButton(
                     icon: Icon(
                       _showConfirmPassword ? Icons.visibility : Icons.visibility_off,
@@ -171,7 +173,7 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
                 activeColor: StaffTheme.primary,
                 contentPadding: EdgeInsets.zero,
                 controlAffinity: ListTileControlAffinity.leading,
-                title: const Text('I confirm this is an authorised staff account.'),
+                title: Text(l10n.staffAuthorizedConfirm),
                 onChanged: (bool? v) => setState(() => _acceptedTerms = v ?? false),
               ),
               const SizedBox(height: 12),
@@ -183,8 +185,8 @@ class _StaffSignUpScreenState extends State<StaffSignUpScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
-                child: const Text(
-                  'Sign up',
+                child: Text(
+                  l10n.signUp,
                   style: TextStyle(fontWeight: FontWeight.w700),
                 ),
               ),

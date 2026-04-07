@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 
 import '../../app_colors.dart';
 import '../../responsive_shell.dart';
@@ -19,33 +20,24 @@ class MainShellScreen extends StatefulWidget {
 class _MainShellScreenState extends State<MainShellScreen> {
   int _index = 0;
 
-  static const List<String> _titles = <String>[
-    'Build Your City',
-    'Mood log',
-    'Dashboard',
-    'Activity',
-    'Settings',
-  ];
-
   void _confirmLeaveToWelcome(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Leave app?'),
-        content: const Text(
-          'You will return to the welcome screen.',
-        ),
+        title: Text(l10n.leaveAppTitle),
+        content: Text(l10n.signOutConfirmBody),
         actions: <Widget>[
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancelLabel),
           ),
           FilledButton(
             onPressed: () {
               Navigator.of(context).pop();
               Navigator.of(context).popUntil((Route<dynamic> r) => r.isFirst);
             },
-            child: const Text('Leave'),
+            child: Text(l10n.leaveAppButton),
           ),
         ],
       ),
@@ -54,6 +46,14 @@ class _MainShellScreenState extends State<MainShellScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+    final List<String> titles = <String>[
+      l10n.shellTitleBuildCity,
+      l10n.shellTitleMoodLog,
+      l10n.dashboardLabel,
+      l10n.shellTitleActivity,
+      l10n.settingsLabel,
+    ];
     return Scaffold(
       backgroundColor: kMainShellBackground,
       appBar: AppBar(
@@ -62,11 +62,11 @@ class _MainShellScreenState extends State<MainShellScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        title: Text(_titles[_index]),
+        title: Text(titles[_index]),
         actions: <Widget>[
           IconButton(
             icon: const Icon(Icons.logout_rounded),
-            tooltip: 'Back to welcome',
+            tooltip: l10n.backToWelcomeTooltip,
             onPressed: () => _confirmLeaveToWelcome(context),
           ),
         ],
@@ -90,31 +90,31 @@ class _MainShellScreenState extends State<MainShellScreen> {
         elevation: 0,
         selectedIndex: _index,
         onDestinationSelected: (int i) => setState(() => _index = i),
-        destinations: const <NavigationDestination>[
+        destinations: <NavigationDestination>[
           NavigationDestination(
-            icon: Icon(Icons.timer_outlined),
-            selectedIcon: Icon(Icons.timer),
-            label: 'Focus',
+            icon: const Icon(Icons.timer_outlined),
+            selectedIcon: const Icon(Icons.timer),
+            label: l10n.tabFocus,
           ),
           NavigationDestination(
-            icon: Icon(Icons.mood_outlined),
-            selectedIcon: Icon(Icons.mood),
-            label: 'Mood',
+            icon: const Icon(Icons.mood_outlined),
+            selectedIcon: const Icon(Icons.mood),
+            label: l10n.tabMood,
           ),
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard),
+            label: l10n.dashboardLabel,
           ),
           NavigationDestination(
-            icon: Icon(Icons.directions_run_outlined),
-            selectedIcon: Icon(Icons.directions_run),
-            label: 'Activity',
+            icon: const Icon(Icons.directions_run_outlined),
+            selectedIcon: const Icon(Icons.directions_run),
+            label: l10n.tabActivity,
           ),
           NavigationDestination(
-            icon: Icon(Icons.settings_outlined),
-            selectedIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            selectedIcon: const Icon(Icons.settings),
+            label: l10n.settingsLabel,
           ),
         ],
       ),

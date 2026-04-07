@@ -1,8 +1,10 @@
 import 'package:fl_chart/fl_chart.dart';
 
 import '../../app_colors.dart';
+import '../../gamification_l10n.dart';
 import '../../main_shell_insets.dart';
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import '../../Gamification.dart';
@@ -26,6 +28,7 @@ class _DashboardTabState extends State<DashboardTab> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return ColoredBox(
       color: kMainShellBackground,
       child: ListView(
@@ -46,7 +49,7 @@ class _DashboardTabState extends State<DashboardTab> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
                       Text(
-                        'Your progress',
+                        l10n.yourProgress,
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
                               fontWeight: FontWeight.w800,
                             ),
@@ -55,19 +58,19 @@ class _DashboardTabState extends State<DashboardTab> {
                       Row(
                         children: <Widget>[
                           _StatChip(
-                            label: 'Level',
+                            label: l10n.levelLabel,
                             value: '${g.currentCurrentLevel}',
                           ),
                           const SizedBox(width: 12),
                           _StatChip(
-                            label: 'Total XP',
+                            label: l10n.totalXpLabel,
                             value: '${g.currentTotalXp}',
                           ),
                         ],
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        g.nextUnlockProgress,
+                        localizedNextUnlockProgress(g, l10n),
                         style: TextStyle(
                           fontSize: 12,
                           height: 1.35,
@@ -82,7 +85,7 @@ class _DashboardTabState extends State<DashboardTab> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Overview',
+            l10n.overviewLabel,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -97,16 +100,16 @@ class _DashboardTabState extends State<DashboardTab> {
                 ),
                 visualDensity: VisualDensity.standard,
               ),
-              segments: const <ButtonSegment<int>>[
+              segments: <ButtonSegment<int>>[
                 ButtonSegment<int>(
                   value: 0,
-                  label: Text('Today'),
-                  icon: Icon(Icons.today_outlined, size: 18),
+                  label: Text(l10n.todaySegment),
+                  icon: const Icon(Icons.today_outlined, size: 18),
                 ),
                 ButtonSegment<int>(
                   value: 1,
-                  label: Text('Week'),
-                  icon: Icon(Icons.date_range_outlined, size: 18),
+                  label: Text(l10n.weekSegment),
+                  icon: const Icon(Icons.date_range_outlined, size: 18),
                 ),
               ],
               selected: <int>{_periodIndex},
@@ -121,12 +124,15 @@ class _DashboardTabState extends State<DashboardTab> {
             crossFadeState: _periodIndex == 0
                 ? CrossFadeState.showFirst
                 : CrossFadeState.showSecond,
-            firstChild: const _TodayContentCard(),
-            secondChild: _WeekChartCard(mockMinutes: _mockWeekMinutes),
+            firstChild: _TodayContentCard(l10n: l10n),
+            secondChild: _WeekChartCard(
+              mockMinutes: _mockWeekMinutes,
+              l10n: l10n,
+            ),
           ),
           const SizedBox(height: 20),
           Text(
-            'Calendar',
+            l10n.calendarLabel,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
                 ),
@@ -137,10 +143,11 @@ class _DashboardTabState extends State<DashboardTab> {
             onDayChanged: (DateTime d) {
               setState(() => _selectedCalendarDay = _dateOnly(d));
             },
+            l10n: l10n,
           ),
           const SizedBox(height: 8),
           Text(
-            'Use arrows to change month. Tap a day to see its summary.',
+            l10n.calendarHint,
             style: TextStyle(fontSize: 12, color: Colors.grey[600]),
           ),
         ],
@@ -150,7 +157,9 @@ class _DashboardTabState extends State<DashboardTab> {
 }
 
 class _TodayContentCard extends StatelessWidget {
-  const _TodayContentCard();
+  const _TodayContentCard({required this.l10n});
+
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -167,7 +176,7 @@ class _TodayContentCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Text(
-              "Today's summary",
+              l10n.todaysSummary,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -175,30 +184,30 @@ class _TodayContentCard extends StatelessWidget {
             const SizedBox(height: 12),
             _TodayRow(
               icon: Icons.timer_outlined,
-              label: 'Focus time',
-              value: '42 min',
-              hint: '--',
+              label: l10n.focusTimeLabel,
+              value: l10n.focusMinutesValue(42),
+              hint: l10n.statPlaceholder,
             ),
             const Divider(height: 24),
             _TodayRow(
               icon: Icons.flag_outlined,
-              label: 'Sessions completed',
+              label: l10n.sessionsCompletedLabel,
               value: '2',
-              hint: '--',
+              hint: l10n.statPlaceholder,
             ),
             const Divider(height: 24),
             _TodayRow(
               icon: Icons.mood_outlined,
-              label: 'Mood check-ins',
+              label: l10n.moodCheckInsLabel,
               value: '1',
-              hint: '--',
+              hint: l10n.statPlaceholder,
             ),
             const Divider(height: 24),
             _TodayRow(
               icon: Icons.add_chart_outlined,
-              label: 'XP gained today',
+              label: l10n.xpGainedTodayLabel,
               value: '+30',
-              hint: '--',
+              hint: l10n.statPlaceholder,
             ),
           ],
         ),
@@ -259,12 +268,15 @@ class _TodayRow extends StatelessWidget {
 }
 
 class _WeekChartCard extends StatelessWidget {
-  const _WeekChartCard({required this.mockMinutes});
+  const _WeekChartCard({required this.mockMinutes, required this.l10n});
 
   final List<double> mockMinutes;
+  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
+    final List<String> dayLabels =
+        l10n.weekChartDayLabels.split(',').map((String s) => s.trim()).toList();
     return Card(
       elevation: 0,
       color: Colors.white,
@@ -280,7 +292,7 @@ class _WeekChartCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Text(
-                'This week — focus minutes',
+                l10n.weekFocusMinutesTitle,
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.w700,
                     ),
@@ -326,23 +338,14 @@ class _WeekChartCard extends StatelessWidget {
                       sideTitles: SideTitles(
                         showTitles: true,
                         getTitlesWidget: (double v, _) {
-                          const List<String> days = <String>[
-                            'M',
-                            'T',
-                            'W',
-                            'T',
-                            'F',
-                            'S',
-                            'S',
-                          ];
                           final int i = v.toInt();
-                          if (i < 0 || i >= days.length) {
+                          if (i < 0 || i >= dayLabels.length) {
                             return const SizedBox.shrink();
                           }
                           return Padding(
                             padding: const EdgeInsets.only(top: 8),
                             child: Text(
-                              days[i],
+                              dayLabels[i],
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey[700],
@@ -385,10 +388,12 @@ class _DashboardCalendarSection extends StatelessWidget {
   const _DashboardCalendarSection({
     required this.selectedDay,
     required this.onDayChanged,
+    required this.l10n,
   });
 
   final DateTime selectedDay;
   final ValueChanged<DateTime> onDayChanged;
+  final AppLocalizations l10n;
 
   static const Color _green = Color(0xFF46AA57);
 
@@ -447,7 +452,7 @@ class _DashboardCalendarSection extends StatelessWidget {
                     Icon(Icons.event_note_rounded, size: 20, color: _green.withValues(alpha: 0.9)),
                     const SizedBox(width: 8),
                     Text(
-                      'Day summary',
+                      l10n.daySummaryTitle,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w800,
                           ),
@@ -466,7 +471,7 @@ class _DashboardCalendarSection extends StatelessWidget {
                 if (isSelectedToday) ...<Widget>[
                   const SizedBox(height: 6),
                   Text(
-                    'Today',
+                    l10n.todayLabel,
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
@@ -480,15 +485,15 @@ class _DashboardCalendarSection extends StatelessWidget {
                     Expanded(
                       child: _DayStatTile(
                         icon: Icons.timer_outlined,
-                        label: 'Focus',
-                        value: '${_demoFocusMinutes(selectedDay)} min',
+                        label: l10n.dayStatFocus,
+                        value: l10n.focusMinutesValue(_demoFocusMinutes(selectedDay)),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
                       child: _DayStatTile(
                         icon: Icons.flag_outlined,
-                        label: 'Sessions',
+                        label: l10n.dayStatSessions,
                         value: '${_demoSessions(selectedDay)}',
                       ),
                     ),

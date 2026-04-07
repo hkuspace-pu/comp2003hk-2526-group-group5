@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'Register.dart';
@@ -45,13 +46,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter email and password.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterEmailPassword)),
       );
       return;
     }
     if (!_looksLikeEmail(email)) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid-looking email.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.msgEnterValidEmail)),
       );
       return;
     }
@@ -73,9 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleGoogleSignIn() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Google sign-in is not available yet.'),
-      ),
+      SnackBar(content: Text(AppLocalizations.of(context)!.msgGoogleUnavailable)),
     );
   }
 
@@ -94,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.text = kDemoLoginEmail;
     _passwordController.text = kDemoLoginPassword;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Email and password filled.')),
+      SnackBar(content: Text(AppLocalizations.of(context)!.msgEmailPasswordFilled)),
     );
   }
 
@@ -106,6 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: const Color(0xFFF8F8EC),
       body: SafeArea(
@@ -122,8 +122,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: Colors.black87,
                 ),
               ),
-              const Text(
-                'Login Now',
+              Text(
+                l10n.loginNowTitle,
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
@@ -132,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: 16),
               Text(
-                'Please login or sign up to continue using our app',
+                l10n.authContinueHint,
                 style: TextStyle(
                   fontSize: 16,
                   color: Colors.grey[600],
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Sample account',
+                            l10n.sampleAccountTitle,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Use this sample account for quick sign-in.',
+                        l10n.sampleAccountHint,
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -220,8 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text(
-                                'Fill fields',
+                              child: Text(
+                                l10n.fillFields,
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
                             ),
@@ -237,8 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text(
-                                'Quick sign in',
+                              child: Text(
+                                l10n.quickSignIn,
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
                             ),
@@ -252,7 +252,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 28),
 
               // Email field
-              const Text('Email',
+              Text(l10n.emailLabel,
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -262,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(
-                  hintText: 'Enter your email',
+                  hintText: l10n.enterEmailHint,
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -285,7 +285,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 20),
 
               // Password field
-              const Text('Password',
+              Text(l10n.passwordLabel,
                   style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
@@ -295,7 +295,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 controller: _passwordController,
                 obscureText: true,
                 decoration: InputDecoration(
-                  hintText: 'Enter your password',
+                  hintText: l10n.enterPasswordHint,
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -323,7 +323,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: TextButton(
                   onPressed: _handleForgotPassword,
                   child: Text(
-                    'Forgot password?',
+                    l10n.forgotPassword,
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.grey[600],
@@ -349,8 +349,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     elevation: 8,
                   ),
-                  child: const Text(
-                    'Login',
+                  child: Text(
+                    l10n.loginButton,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -375,8 +375,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     errorBuilder: (context, error, stackTrace) =>
                     const Icon(Icons.account_circle, size: 20),
                   ),
-                  label: const Text(
-                    'Sign in with Google',
+                  label: Text(
+                    l10n.signInWithGoogle,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   style: OutlinedButton.styleFrom(
@@ -395,13 +395,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Don't have an account? ",
+                    l10n.noAccountPrompt,
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   GestureDetector(
                     onTap: _handleSignUp,
                     child: Text(
-                      'Sign up',
+                      l10n.signUp,
                       style: TextStyle(
                         color: const Color(0xFF46AA57),
                         fontWeight: FontWeight.w600,
