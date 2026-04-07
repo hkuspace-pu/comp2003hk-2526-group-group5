@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'Login.dart';
 import 'screens/user/privacy_policy_screen.dart';
-import 'screens/user/signed_in_placeholder_screen.dart';
+import 'screens/main/main_shell_screen.dart';
 
 class SignUpData extends ChangeNotifier {
   bool _privacyPolicyAccepted;
@@ -100,7 +100,7 @@ class SignUpScreen extends StatelessWidget {
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => const SignedInPlaceholderScreen(),
+        builder: (BuildContext context) => const MainShellScreen(),
       ),
     );
   }

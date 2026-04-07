@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'Register.dart';
 import 'screens/user/forgot_password_screen.dart';
-import 'screens/user/signed_in_placeholder_screen.dart';
+import 'screens/main/main_shell_screen.dart';
 
 /// Shown on the login page for UI demos (not tied to Firebase).
 const String kDemoLoginEmail = 'demo@screen-time.app';
@@ -58,7 +58,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     Navigator.of(context).pushReplacement(
       MaterialPageRoute<void>(
-        builder: (BuildContext context) => const SignedInPlaceholderScreen(),
+        builder: (BuildContext context) => const MainShellScreen(),
       ),
     );
   }
