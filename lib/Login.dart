@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleGoogleSignIn() {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Google sign-in: UI only (integrate in a later phase).'),
+        content: Text('Google sign-in is not available yet.'),
       ),
     );
   }
@@ -94,7 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.text = kDemoLoginEmail;
     _passwordController.text = kDemoLoginPassword;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Demo email and password filled.')),
+      const SnackBar(content: Text('Email and password filled.')),
     );
   }
 
@@ -169,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            'Demo account',
+                            'Sample account',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -180,7 +180,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'For UI previews only — not a real backend user.',
+                        'Use this sample account for quick sign-in.',
                         style: TextStyle(
                           fontSize: 13,
                           color: Colors.grey[600],
@@ -238,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
                               child: const Text(
-                                'Sign in with demo',
+                                'Quick sign in',
                                 style: TextStyle(fontWeight: FontWeight.w600),
                               ),
                             ),

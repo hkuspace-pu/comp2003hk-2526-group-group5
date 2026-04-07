@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Placeholder copy for sign-up flow (UI only).
+/// Privacy policy copy used by sign-up flow.
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
 
@@ -21,7 +21,7 @@ class PrivacyPolicyScreen extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
           children: <Widget>[
             Text(
-              'Last updated (UI mock)',
+              'Last updated',
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey[600],
@@ -32,18 +32,17 @@ class PrivacyPolicyScreen extends StatelessWidget {
             _Section(
               title: 'What we collect',
               body:
-                  'This is placeholder text for your course project. Replace '
-                  'with real policy before release. We describe what data '
-                  'the app would collect (account email, mood logs, focus '
-                  'sessions) once backend features are enabled.',
+                  'We collect information you provide in the app, such as '
+                  'account email, mood logs, and focus session records, to '
+                  'support core features and improve your experience.',
             ),
             const SizedBox(height: 20),
             _Section(
               title: 'How we use it',
               body:
-                  'Placeholder: data would be used to show your dashboard, '
-                  'sync across devices, and improve the experience. No '
-                  'actual processing happens in UI-only builds.',
+                  'Your data is used to show your dashboard, help sync your '
+                  'experience across supported devices, and maintain app '
+                  'features related to productivity and wellbeing.',
             ),
             const SizedBox(height: 20),
             _Section(

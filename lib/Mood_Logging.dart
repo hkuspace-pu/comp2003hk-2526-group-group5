@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
+import 'app_colors.dart';
+import 'main_shell_insets.dart';
 
 void main() {
   runApp(const MoodLoggingApp());
@@ -18,60 +22,325 @@ class MoodLoggingApp extends StatelessWidget {
 }
 
 class MoodLoggingPage extends StatefulWidget {
-  const MoodLoggingPage({super.key});
+  const MoodLoggingPage({super.key, this.embedded = false});
+
+  /// When true, omit [Scaffold] chrome for use inside [MainShellScreen].
+  final bool embedded;
 
   @override
   State<MoodLoggingPage> createState() => _MoodLoggingPageState();
 }
 
 class _MoodLoggingPageState extends State<MoodLoggingPage> {
+  static const Color _brandGreen = Color(0xFF46AA57);
+
   int selectedMood = 2;
+
+  final List<IconData> moodIcons = <IconData>[
+    Icons.sentiment_very_dissatisfied_rounded,
+    Icons.sentiment_dissatisfied_rounded,
+    Icons.sentiment_neutral_rounded,
+    Icons.sentiment_satisfied_rounded,
+    Icons.sentiment_very_satisfied_rounded,
+  ];
+
+  final List<Color> moodColors = <Color>[
+    const Color(0xFFE57373),
+    const Color(0xFFFFB74D),
+    const Color(0xFFFFD54F),
+    const Color(0xFF81C784),
+    _brandGreen,
+  ];
+
+  final List<String> moodTexts = <String>[
+    'I feel very sad!',
+    'I feel a bit down!',
+    'I feel normal!',
+    'I feel good!',
+    'I feel great!',
+  ];
+
+  final List<String> moodShortLabels = <String>[
+    'Very low',
+    'Low',
+    'OK',
+    'Good',
+    'Great',
+  ];
+
   int _selectedIndex = 0;
 
-  final List<IconData> moodIcons = [
-    Icons.sentiment_very_dissatisfied,
-    Icons.sentiment_dissatisfied,
-    Icons.sentiment_neutral,
-    Icons.sentiment_satisfied,
-    Icons.sentiment_very_satisfied,
-  ];
-
-  final List<Color> moodColors = [
-    Colors.red,
-    Colors.deepOrange,
-    Colors.yellow,
-    Colors.lightGreen,
-    Colors.green,
-  ];
-
-  final List<String> moodTexts = [
-    "I feel very sad!",
-    "I feel a bit down!",
-    "I feel normal!",
-    "I feel good!",
-    "I feel great!",
-  ];
-
   void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
+    setState(() => _selectedIndex = index);
+  }
+
+  void _selectMood(int index) {
+    HapticFeedback.lightImpact();
+    setState(() => selectedMood = index);
   }
 
   @override
   Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+
+    final List<Widget> moodColumn = <Widget>[
+      Text(
+        'How are you feeling?',
+        style: textTheme.titleLarge?.copyWith(
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.3,
+        ),
+      ),
+      const SizedBox(height: 6),
+      Text(
+        'Move along the scale or tap an icon to log how you feel right now.',
+        style: TextStyle(
+          fontSize: 14,
+          height: 1.4,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      const SizedBox(height: 24),
+      Card(
+        elevation: 0,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: Colors.grey.shade200),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
+          child: Column(
+            children: <Widget>[
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 280),
+                switchInCurve: Curves.easeOutCubic,
+                switchOutCurve: Curves.easeInCubic,
+                child: Column(
+                  key: ValueKey<int>(selectedMood),
+                  children: <Widget>[
+                    Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: moodColors[selectedMood].withValues(alpha: 0.18),
+                        boxShadow: <BoxShadow>[
+                          BoxShadow(
+                            color: moodColors[selectedMood].withValues(alpha: 0.25),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        moodIcons[selectedMood],
+                        color: moodColors[selectedMood],
+                        size: 72,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      moodTexts[selectedMood],
+                      textAlign: TextAlign.center,
+                      style: textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: Colors.grey.shade900,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      moodShortLabels[selectedMood],
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: _brandGreen,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 28),
+              // Gradient track (replaces bright blue bar)
+              LayoutBuilder(
+                builder: (BuildContext context, BoxConstraints constraints) {
+                  return Column(
+                    children: <Widget>[
+                      SizedBox(
+                        height: 10,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: <Widget>[
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(999),
+                                gradient: LinearGradient(
+                                  colors: <Color>[
+                                    moodColors.first.withValues(alpha: 0.45),
+                                    moodColors[2].withValues(alpha: 0.5),
+                                    moodColors.last.withValues(alpha: 0.55),
+                                  ],
+                                ),
+                              ),
+                              child: const SizedBox.expand(),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: List<Widget>.generate(moodIcons.length, (int i) {
+                                return Container(
+                                  width: 2,
+                                  height: 10,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                    borderRadius: BorderRadius.circular(1),
+                                  ),
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List<Widget>.generate(moodIcons.length, (int i) {
+                          return Icon(
+                            Icons.arrow_drop_down_rounded,
+                            size: 22,
+                            color: i == selectedMood ? _brandGreen : Colors.transparent,
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: List<Widget>.generate(moodIcons.length, (int i) {
+                          final bool isSelected = i == selectedMood;
+                          return Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => _selectMood(i),
+                                  borderRadius: BorderRadius.circular(14),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    curve: Curves.easeOutCubic,
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(14),
+                                      border: Border.all(
+                                        color: isSelected
+                                            ? _brandGreen.withValues(alpha: 0.65)
+                                            : Colors.grey.shade200,
+                                        width: isSelected ? 2 : 1,
+                                      ),
+                                      color: isSelected
+                                          ? _brandGreen.withValues(alpha: 0.08)
+                                          : Colors.grey.shade50,
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: <Widget>[
+                                        Icon(
+                                          moodIcons[i],
+                                          color: moodColors[i],
+                                          size: 28,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          moodShortLabels[i],
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                            color: isSelected ? _brandGreen : Colors.grey.shade600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      const SizedBox(height: 20),
+      if (!widget.embedded) const Spacer(),
+      if (widget.embedded) const SizedBox(height: 8),
+      FilledButton.icon(
+        onPressed: () {
+          HapticFeedback.mediumImpact();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              behavior: SnackBarBehavior.floating,
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              content: Row(
+                children: <Widget>[
+                  const Icon(Icons.check_circle_rounded, color: Colors.white),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Saved: ${moodTexts[selectedMood]}',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+        style: FilledButton.styleFrom(
+          backgroundColor: _brandGreen,
+          foregroundColor: Colors.white,
+          minimumSize: const Size(double.infinity, 52),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          elevation: 0,
+        ),
+        icon: const Icon(Icons.save_rounded, size: 22),
+        label: const Text(
+          'Save mood',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16),
+        ),
+      ),
+      const SizedBox(height: 12),
+    ];
+
+    if (widget.embedded) {
+      return ColoredBox(
+        color: kMainShellBackground,
+        child: ListView(
+          padding: kMainTabScrollPadding,
+          children: moodColumn,
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFFDF9F6),
+      backgroundColor: kMainShellBackground,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF46AA57),
+        backgroundColor: _brandGreen,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () {},
         ),
         centerTitle: true,
         title: const Text(
-          "Mood Logging",
+          'Mood Logging',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
@@ -79,137 +348,23 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            const SizedBox(height: 12),
-            const Text(
-              "How is your mood today?",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-
-            // BIG ICON (selected mood)
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 300),
-              child: Icon(
-                moodIcons[selectedMood],
-                key: ValueKey<int>(selectedMood),
-                color: moodColors[selectedMood],
-                size: 120,
-              ),
-            ),
-            const SizedBox(height: 50),
-            Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 10),
-                  height: 20,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      // Main horizontal line
-                      Container(
-                        height: 15.0,
-                        color: Colors.lightBlue.shade300,
-                      ),
-
-                      // Vertical tick marks
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: List.generate(moodIcons.length, (index) {
-                          return Container(
-                            width: 2,
-                            height: 12,
-                            color: Colors.blueAccent.withAlpha((255 * 0.7).round()),
-                          );
-                        }),
-                      ),
-                    ],
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(moodIcons.length, (index) {
-                    return index == selectedMood
-                        ? const Icon(Icons.arrow_downward,
-                        size: 22, color: Colors.blueAccent)
-                        : const SizedBox(width: 48);
-                  }),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: List.generate(moodIcons.length, (index) {
-                    bool isSelected = index == selectedMood;
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          selectedMood = index;
-                        });
-                      },
-                      child: AnimatedScale(
-                        duration: const Duration(milliseconds: 200),
-                        scale: isSelected ? 1.3 : 1.0,
-                        child: Icon(
-                          moodIcons[index],
-                          color: moodColors[index],
-                          size: 48,
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ],
-            ),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(
-                        "Mood saved: ${moodTexts[selectedMood]}",
-                        textAlign: TextAlign.center,
-                      ),
-                      duration: const Duration(seconds: 2),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF46AA57),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: Text(
-                  moodTexts[selectedMood],
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    fontSize: 25,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: moodColumn,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: Colors.green,
+        selectedItemColor: _brandGreen,
         unselectedItemColor: Colors.grey[600],
         items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.event), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.area_chart), label: ''),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.event_outlined), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.area_chart_outlined), label: ''),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_outlined), label: ''),
         ],
       ),
     );

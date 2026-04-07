@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
+
+import 'Gamification.dart';
+import 'Setting.dart';
 import 'firebase_options.dart';
 import 'screens/user/welcome_screen.dart';
 
@@ -16,16 +20,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Screen time',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
-            .copyWith(secondary: const Color(0xFF46AA57)),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<GamificationData>(
+          create: (_) => GamificationData(),
+        ),
+        ChangeNotifierProvider<FocusSessionData>(
+          create: (BuildContext context) => FocusSessionData(
+            Provider.of<GamificationData>(context, listen: false),
+          ),
+        ),
+        ChangeNotifierProvider<UserProvider>(
+          create: (_) => UserProvider(),
+        ),
+      ],
+      child: MaterialApp(
+        title: 'Screen time',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+          colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.green)
+              .copyWith(secondary: const Color(0xFF46AA57)),
+        ),
+        home: const UserWelcomeScreen(),
       ),
-      home: const UserWelcomeScreen(),
     );
   }
 }

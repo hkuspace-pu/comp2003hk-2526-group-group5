@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// Main app shell with [NavigationBar]; each tab is a placeholder until real screens are added.
+import '../../app_colors.dart';
+import '../../responsive_shell.dart';
+import '../../Mood_Logging.dart';
+import '../../Session_Activity.dart';
+import '../../Setting.dart';
+import 'dashboard_tab.dart';
+import 'focus_city_tab.dart';
+
+/// Main app shell with [NavigationBar] and tab bodies (UI).
 class MainShellScreen extends StatefulWidget {
   const MainShellScreen({super.key});
 
@@ -12,7 +20,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
   int _index = 0;
 
   static const List<String> _titles = <String>[
-    'Focus',
+    'Build Your City',
     'Mood log',
     'Dashboard',
     'Activity',
@@ -23,9 +31,9 @@ class _MainShellScreenState extends State<MainShellScreen> {
     showDialog<void>(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-        title: const Text('Leave app preview?'),
+        title: const Text('Leave app?'),
         content: const Text(
-          'You will return to the welcome screen. (UI only — no sign-out API.)',
+          'You will return to the welcome screen.',
         ),
         actions: <Widget>[
           TextButton(
@@ -47,7 +55,13 @@ class _MainShellScreenState extends State<MainShellScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: kMainShellBackground,
       appBar: AppBar(
+        backgroundColor: kMainShellBackground,
+        foregroundColor: Colors.black87,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         title: Text(_titles[_index]),
         actions: <Widget>[
           IconButton(
@@ -57,37 +71,23 @@ class _MainShellScreenState extends State<MainShellScreen> {
           ),
         ],
       ),
-      body: IndexedStack(
-        index: _index,
-        children: const <Widget>[
-          _TabPlaceholder(
-            icon: Icons.timer_outlined,
-            title: 'Focus',
-            hint: 'Timer and resume state — coming next.',
-          ),
-          _TabPlaceholder(
-            icon: Icons.mood_outlined,
-            title: 'Mood log',
-            hint: 'Logging UI — coming next.',
-          ),
-          _TabPlaceholder(
-            icon: Icons.dashboard_outlined,
-            title: 'Dashboard',
-            hint: 'Charts and summary — coming next.',
-          ),
-          _TabPlaceholder(
-            icon: Icons.directions_run_outlined,
-            title: 'Activity',
-            hint: 'Activity list and share — coming next.',
-          ),
-          _TabPlaceholder(
-            icon: Icons.settings_outlined,
-            title: 'Settings',
-            hint: 'Account, notifications, export — coming next.',
-          ),
-        ],
+      body: ResponsiveShellBody(
+        child: IndexedStack(
+          index: _index,
+          children: const <Widget>[
+            FocusCityTab(),
+            MoodLoggingPage(embedded: true),
+            DashboardTab(),
+            SessionCompleteScreen(embedded: true),
+            SettingsPage(embedded: true),
+          ],
+        ),
       ),
       bottomNavigationBar: NavigationBar(
+        height: 62,
+        backgroundColor: kMainShellBackground,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
         selectedIndex: _index,
         onDestinationSelected: (int i) => setState(() => _index = i),
         destinations: const <NavigationDestination>[
@@ -104,7 +104,7 @@ class _MainShellScreenState extends State<MainShellScreen> {
           NavigationDestination(
             icon: Icon(Icons.dashboard_outlined),
             selectedIcon: Icon(Icons.dashboard),
-            label: 'Dash',
+            label: 'Dashboard',
           ),
           NavigationDestination(
             icon: Icon(Icons.directions_run_outlined),
@@ -117,56 +117,6 @@ class _MainShellScreenState extends State<MainShellScreen> {
             label: 'Settings',
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _TabPlaceholder extends StatelessWidget {
-  const _TabPlaceholder({
-    required this.icon,
-    required this.title,
-    required this.hint,
-  });
-
-  final IconData icon;
-  final String title;
-  final String hint;
-
-  @override
-  Widget build(BuildContext context) {
-    final ColorScheme scheme = Theme.of(context).colorScheme;
-
-    return ColoredBox(
-      color: const Color(0xFFF8F8EC),
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Icon(icon, size: 64, color: scheme.primary.withValues(alpha: 0.85)),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                      color: Colors.black87,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                hint,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: Colors.black54,
-                      height: 1.4,
-                    ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
