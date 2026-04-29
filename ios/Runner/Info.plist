@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- Permissions for Screen Time Tracker Multimedia Features -->
+
+    	<key>NSCameraUsageDescription</key>
+    	<string>This app needs camera access to take photos of your offline activities as proof (e.g., jogging or exercise photos).</string>
+    	<key>NSMicrophoneUsageDescription</key>
+    	<string>This app needs microphone access to record audio for your activity videos.</string>
+    	<key>NSPhotoLibraryUsageDescription</key>
+    	<string>This app needs photo library access so you can select existing photos or videos of your activity proof.</string>
+
 </dict>
 </plist>
