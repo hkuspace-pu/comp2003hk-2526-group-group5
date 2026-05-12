@@ -1,0 +1,223 @@
+import 'package:flutter/material.dart';
+import 'package:groupproject_group5/l10n/app_localizations.dart';
+
+import '../../widgets/language_switcher.dart';
+import 'staff_login_screen.dart';
+import 'staff_signup_screen.dart';
+import 'staff_theme.dart';
+
+/// Entry screen for Staff (員工) — separate from the student welcome flow.
+class StaffWelcomeScreen extends StatelessWidget {
+  const StaffWelcomeScreen({super.key});
+
+  void _openStaffLogin(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const StaffLoginScreen(),
+      ),
+    );
+  }
+
+  void _openStaffSignUp(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const StaffSignUpScreen(),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final TextTheme textTheme = Theme.of(context).textTheme;
+    final AppLocalizations l10n = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      backgroundColor: StaffTheme.background,
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 28),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: <Widget>[
+                      Row(
+                        children: <Widget>[
+                          AppLanguageIconButton(
+                            iconColor: StaffTheme.primary,
+                          ),
+                          const Spacer(),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.staffPortalTitle,
+                        textAlign: TextAlign.center,
+                        style: textTheme.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: StaffTheme.primary,
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.staffPortalSubtitle,
+                        textAlign: TextAlign.center,
+                        style: textTheme.titleSmall?.copyWith(
+                          color: StaffTheme.primary.withValues(alpha: 0.75),
+                          fontWeight: FontWeight.w600,
+                          height: 1.35,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        l10n.staffPortalBody,
+                        textAlign: TextAlign.center,
+                        style: textTheme.bodyMedium?.copyWith(
+                          color: Colors.black54,
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 36),
+                      Center(
+                        child: Container(
+                          width: 160,
+                          height: 160,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: StaffTheme.primary.withValues(alpha: 0.08),
+                            boxShadow: <BoxShadow>[
+                              BoxShadow(
+                                color: StaffTheme.primary.withValues(alpha: 0.12),
+                                blurRadius: 24,
+                                offset: const Offset(0, 12),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.admin_panel_settings_rounded,
+                            size: 72,
+                            color: StaffTheme.primary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      _Bullet(
+                        icon: Icons.dashboard_customize_outlined,
+                        text: l10n.staffBullet1,
+                      ),
+                      const SizedBox(height: 10),
+                      _Bullet(
+                        icon: Icons.groups_outlined,
+                        text: l10n.staffBullet2,
+                      ),
+                      const SizedBox(height: 10),
+                      _Bullet(
+                        icon: Icons.lock_outline_rounded,
+                        text: l10n.staffBullet3,
+                      ),
+                      const Spacer(),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        height: 54,
+                        child: FilledButton(
+                          onPressed: () => _openStaffLogin(context),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: StaffTheme.primary,
+                            foregroundColor: StaffTheme.onPrimary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            elevation: 4,
+                            shadowColor: StaffTheme.primary.withValues(alpha: 0.35),
+                          ),
+                          child: Text(
+                            l10n.signIn,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        height: 52,
+                        child: OutlinedButton(
+                          onPressed: () => _openStaffSignUp(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: StaffTheme.primary,
+                            side: BorderSide(
+                              color: StaffTheme.primary.withValues(alpha: 0.65),
+                              width: 1.6,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          child: Text(
+                            l10n.signUp,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextButton(
+                        onPressed: () => Navigator.of(context).maybePop(),
+                        child: Text(
+                          l10n.backToStudentApp,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: StaffTheme.accent,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _Bullet extends StatelessWidget {
+  const _Bullet({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Icon(
+          icon,
+          size: 22,
+          color: StaffTheme.primary.withValues(alpha: 0.85),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.black87,
+                  height: 1.35,
+                ),
+          ),
+        ),
+      ],
+    );
+  }
+}
