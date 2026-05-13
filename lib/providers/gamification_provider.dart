@@ -15,15 +15,15 @@ class GamificationProvider with ChangeNotifier {
   // Static Configuration
   static const List<ItemInfo> allItems = [
     ItemInfo(type: ItemType.tree, label: 'Tree', imagePath: 'images/tree.png', unlockXp: 0, levelUnlock: 0, description: 'Adds natural beauty to your city'),
-    ItemInfo(type: ItemType.park, label: 'Park', imagePath: 'images/park.png', unlockXp: 250, levelUnlock: 1, description: 'A green space for relaxation and play'),
-    ItemInfo(type: ItemType.house, label: 'House', imagePath: 'images/house.png', unlockXp: 500, levelUnlock: 2, description: 'Provides shelter for citizens'),
-    ItemInfo(type: ItemType.building, label: 'Building', imagePath: 'images/building.png', unlockXp: 750, levelUnlock: 3, description: 'A tall structure to mark your progress'),
-    ItemInfo(type: ItemType.road, label: 'Road', imagePath: 'images/road.png', unlockXp: 1000, levelUnlock: 4, description: 'Connects your city\'s areas'),
-    ItemInfo(type: ItemType.river, label: 'River', imagePath: 'images/river.png', unlockXp: 1250, levelUnlock: 5, description: 'A flowing waterway for scenic beauty'),
-    ItemInfo(type: ItemType.bridge, label: 'Bridge', imagePath: 'images/bridge.png', unlockXp: 1500, levelUnlock: 6, description: 'Spans over rivers and gaps'),
+    ItemInfo(type: ItemType.park, label: 'Park', imagePath: 'images/park.png', unlockXp: 2500, levelUnlock: 1, description: 'A green space for relaxation and play'),
+    ItemInfo(type: ItemType.house, label: 'House', imagePath: 'images/house.png', unlockXp: 5000, levelUnlock: 2, description: 'Provides shelter for citizens'),
+    ItemInfo(type: ItemType.building, label: 'Building', imagePath: 'images/building.png', unlockXp: 10000, levelUnlock: 3, description: 'A tall structure to mark your progress'),
+    ItemInfo(type: ItemType.road, label: 'Road', imagePath: 'images/road.png', unlockXp: 20000, levelUnlock: 4, description: 'Connects your city\'s areas'),
+    ItemInfo(type: ItemType.river, label: 'River', imagePath: 'images/river.png', unlockXp: 50000, levelUnlock: 5, description: 'A flowing waterway for scenic beauty'),
+    ItemInfo(type: ItemType.bridge, label: 'Bridge', imagePath: 'images/bridge.png', unlockXp: 100000, levelUnlock: 6, description: 'Spans over rivers and gaps'),
   ];
 
-  static const Map<int, int> levelXpThresholds = {0: 0, 1: 250, 2: 500, 3: 750, 4: 1000, 5: 1250, 6: 1500};
+  static const Map<int, int> levelXpThresholds = {0: 0, 1: 2500, 2: 5000, 3: 10000, 4: 20000, 5: 50000, 6: 100000};
 
   // State Variables
   DateTime? _gamificationStartDate;

@@ -16,7 +16,7 @@ class FocusSessionProvider with ChangeNotifier {
 
   // --- Configuration ---
   static const Map<int, Duration> levelDurations = {
-    0: Duration(minutes: 2), 1: Duration(minutes: 60), 2: Duration(minutes: 60),
+    0: Duration(minutes: 15), 1: Duration(minutes: 30), 2: Duration(minutes: 60),
     3: Duration(minutes: 90), 4: Duration(minutes: 120), 5: Duration(minutes: 150),
     6: Duration(minutes: 180),
   };
