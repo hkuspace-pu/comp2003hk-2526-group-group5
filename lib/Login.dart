@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Added Firestore import
 import 'package:groupproject_group5/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 
@@ -48,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
     return v.contains('@') && v.contains('.');
   }
 
-  /// Authenticate user with Firebase Email & Password.
+  /// Authenticate user with Firebase Email & Password and verify role.
   Future<void> _handleLogin() async {
     final String email = _emailController.text.trim();
     final String password = _passwordController.text;
@@ -71,11 +72,52 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Firebase Authentication Sign In.
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      // 1. Firebase Authentication Sign In.
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // 2. Retrieve user profile data from Firestore 'users' collection.
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users') // Unified collection for all users
+          .doc(userCredential.user!.uid)
+          .get();
+
+      // ========================================================
+      // [Core Modification: Role Verification / Route Guard]
+      // ========================================================
+      if (userDoc.exists && userDoc.data() != null) {
+        final data = userDoc.data()!;
+
+        // Check if the role field exists and equals 'staff'.
+        if (data.containsKey('role') && data['role'] == 'staff') {
+          // Force sign out immediately if a staff account tries to access user client app.
+          await FirebaseAuth.instance.signOut();
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Access Denied: Staff accounts cannot login to the user page."),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+          return; // Abort further navigation.
+        }
+      } else {
+        // Handle edge case where Auth account exists but Firestore record is missing.
+        await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Account Error: Profile record not found in database."),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+        return; // Abort further navigation.
+      }
+      // ========================================================
 
       // On success, navigate to the main application shell.
       if (!mounted) return;
@@ -206,7 +248,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 enabled: !_isLoading,
                 decoration: InputDecoration(
                   hintText: l10n.enterEmailHint,
-                  // Adjusted hint text style to be lighter grey
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -231,7 +272,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 enabled: !_isLoading,
                 decoration: InputDecoration(
                   hintText: l10n.enterPasswordHint,
-                  // Adjusted hint text style to be lighter grey
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   filled: true,
                   fillColor: Colors.white,
@@ -240,7 +280,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderSide: BorderSide.none,
                   ),
                   contentPadding: const EdgeInsets.all(20),
-                  // Added password visibility toggle button
                   suffixIcon: IconButton(
                     icon: Icon(
                       _obscurePassword ? Icons.visibility_off : Icons.visibility,

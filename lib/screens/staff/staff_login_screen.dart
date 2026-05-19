@@ -48,7 +48,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
     return v.contains('@') && v.contains('.');
   }
 
-  /// Handles the Firebase login process.
+  /// Handles the Firebase login process with Role Verification.
   Future<void> _submit() async {
     final AppLocalizations l10n = AppLocalizations.of(context)!;
     final String email = _emailController.text.trim();
@@ -77,7 +77,7 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(email: email, password: password);
 
-      // 2. Retrieve user profile data from Firestore.
+      // 2. Retrieve user profile data from Firestore 'users' collection.
       String displayName = 'Staff';
       final userDoc = await FirebaseFirestore.instance
           .collection('users')
@@ -86,10 +86,39 @@ class _StaffLoginScreenState extends State<StaffLoginScreen> {
 
       if (userDoc.exists && userDoc.data() != null) {
         final data = userDoc.data()!;
+
+        // Verify if the 'role' field exists and equals 'staff'.
+        if (!data.containsKey('role') || data['role'] != 'staff') {
+          // Force sign out immediately if a non-staff user attempts access.
+          await FirebaseAuth.instance.signOut();
+
+          if (!mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("This account is not an staff account. (Access Denied)"),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+          return; // Abort further navigation.
+        }
+
+        // Retrieve the username if authentication succeeds.
         if (data.containsKey('username')) {
           displayName = data['username'];
         }
+      } else {
+
+        await FirebaseAuth.instance.signOut();
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Account error: The user's database file could not be found."),
+            backgroundColor: Colors.orangeAccent,
+          ),
+        );
+        return; // Abort further navigation.
       }
+
 
       if (!mounted) return;
 

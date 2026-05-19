@@ -62,7 +62,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staffBullet3 => 'Restricted to authorised staff accounts';
 
   @override
-  String get backToStudentApp => 'Back to student app';
+  String get backToStudentApp => 'Back to User portal';
 
   @override
   String get settingsLanguage => 'Language';

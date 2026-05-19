@@ -204,7 +204,7 @@ abstract class AppLocalizations {
   /// No description provided for @backToStudentApp.
   ///
   /// In en, this message translates to:
-  /// **'Back to student app'**
+  /// **'Back to User portal'**
   String get backToStudentApp;
 
   /// No description provided for @settingsLanguage.
