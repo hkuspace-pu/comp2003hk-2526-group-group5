@@ -33,7 +33,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
         currentIndex: _currentIndex,
         onTap: (index) => setState(() => _currentIndex = index),
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF46AA57), // 你的主題綠色
+        selectedItemColor: const Color(0xFF46AA57),
         unselectedItemColor: Colors.grey,
         items: [
           _buildNavItem('images/home_icon.png', 'Home'),
