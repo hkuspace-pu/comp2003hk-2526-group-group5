@@ -1,8 +1,8 @@
-import 'dart:io';
+import 'dart:io' show File;
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-
 import '../../core/constants/app_colors.dart';
 import '../../services/firestore_service.dart';
 import '../../services/storage_service.dart';
@@ -16,7 +16,7 @@ class SessionCompleteScreen extends StatefulWidget {
 }
 
 class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
-  File? _mediaFile;
+  XFile? _mediaFile; // Switched from File to cross-platform XFile
   bool _isUploading = false;
   final TextEditingController _commentController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
@@ -33,10 +33,9 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
       source: source,
       imageQuality: 70,
     );
-
     if (pickedFile != null) {
       setState(() {
-        _mediaFile = File(pickedFile.path);
+        _mediaFile = pickedFile; // Save directly as XFile without converting to dart:io File
       });
     }
   }
@@ -83,7 +82,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
     );
   }
 
-  // Submission logic to use the downloadUrl and award 50 XP
+  // Submission logic
   Future<void> _submitSession() async {
     if (_commentController.text.isEmpty && _mediaFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -103,17 +102,34 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
       final uid = firestoreService.uid;
       if (uid == null) throw Exception("User not logged in");
 
-      // Upload the image to Firebase Storage via StorageService
+      // Upload the image to Firebase Storage
       if (_mediaFile != null) {
-        downloadUrl = await storageService.uploadActivityMedia(uid, _mediaFile!);
+        final String fileName = "${DateTime.now().millisecondsSinceEpoch}_${_mediaFile!.name}";
+
+        if (kIsWeb) {
+          // 🌐 Web specific upload using raw bytes
+          final Uint8List bytes = await _mediaFile!.readAsBytes();
+          downloadUrl = await storageService.uploadActivityMedia(
+            uid: uid,
+            fileName: fileName,
+            fileBytes: bytes, // Successfully uses the 'bytes' variable to solve the warning
+          );
+        } else {
+          // 📱 Mobile native safe upload using the file path string
+          downloadUrl = await storageService.uploadActivityMedia(
+            uid: uid,
+            fileName: fileName,
+            filePath: _mediaFile!.path,
+          );
+        }
       }
 
-      // Log Activity to Firestore (Variable downloadUrl is now used)
+      // Log Activity to Firestore
       await firestoreService.logFocusSession(
         durationMinutes: 0,
-        xpEarned: 50, // Matches original PDF logic
+        xpEarned: 50,
         tag: "Offline Activity: ${_commentController.text}",
-        mediaUrl: downloadUrl, // Proof is now saved to the document
+        mediaUrl: downloadUrl,
       );
 
       // Award XP to the local Gamification State
@@ -125,10 +141,7 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
 
       _clearMedia();
       _commentController.clear();
-
       Navigator.pushReplacementNamed(context, '/mood_logging');
-
-
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -164,12 +177,15 @@ class _SessionCompleteScreenState extends State<SessionCompleteScreen> {
                 decoration: BoxDecoration(
                   color: const Color(0xFFF1F1F1),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.primaryGreen.withValues(alpha:0.5)),
+                  border: Border.all(color: AppColors.primaryGreen.withValues(alpha: .5)),
                 ),
                 child: _mediaFile != null
                     ? ClipRRect(
                   borderRadius: BorderRadius.circular(12),
-                  child: Image.file(_mediaFile!, fit: BoxFit.cover),
+                  // Web displays image via network Blob object URL, Mobile renders via file conversion
+                  child: kIsWeb
+                      ? Image.network(_mediaFile!.path, fit: BoxFit.cover)
+                      : Image.file(File(_mediaFile!.path), fit: BoxFit.cover),
                 )
                     : Column(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:flutter/foundation.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../models/user_profile.dart';
 
@@ -15,7 +16,6 @@ class FirestoreService {
   String? get uid => _auth.currentUser?.uid;
 
   // User Account Operations
-
   Future<void> saveUserInitialData({
     required String uid,
     required String name,
@@ -185,20 +185,34 @@ class FirestoreService {
       tsv += "${(row['time'] as DateTime).toIso8601String()}\t${row['cat']}\t${row['val']}\t${row['xp']}\t${row['note']}\n";
     }
 
-    final dir = await getTemporaryDirectory();
-    final file = File('${dir.path}/full_report_${finalUid.substring(0, 5)}.tsv');
-    await file.writeAsString(tsv);
+    if (kIsWeb) {
+      // Web safe download: Convert TSV text content into a Data URI that browsers can read
+      final String encodedTsv = Uri.encodeComponent(tsv);
+      final Uri url = Uri.parse("data:text/tab-separated-values;charset=utf-8,$encodedTsv");
 
-    await SharePlus.instance.share(
-      ShareParams(
-        files: [XFile(file.path)],
-        text: 'Focus City: Full Data Export (Sessions & Moods)',
-      ),
-    );
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
+      } else {
+        // Web Security Fallback: Force a binary stream download to bypass browser blocks
+        final String backupUrl = "data:application/octet-stream;charset=utf-8,$encodedTsv";
+        await launchUrl(Uri.parse(backupUrl));
+      }
+    } else {
+      // Mobile (Android / iOS) native local storage and sharing logic
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/full_report_${finalUid.substring(0, 5)}.tsv');
+      await file.writeAsString(tsv);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          text: 'Focus City: Full Data Export (Sessions & Moods)',
+        ),
+      );
+    }
   }
 
   // Social & Leaderboard
-
   Stream<List<UserProfile>> getGroupLeaderboard(String groupId) {
     return _db.collection('users')
         .where('groupId', isEqualTo: groupId)
