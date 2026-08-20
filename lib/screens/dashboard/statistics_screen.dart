@@ -184,7 +184,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   showTitles: true,
                   reservedSize: 22,
                   getTitlesWidget: (value, meta) {
-                    // 避免低於 0 的刻度重複印 "0"
+
                     if (value < 0) return const SizedBox();
                     return Text('${value.toInt()}', style: const TextStyle(fontSize: 8, color: Colors.grey));
                   },
@@ -276,7 +276,7 @@ class _StatisticsScreenState extends State<StatisticsScreen> {
                   reservedSize: 32,
                   interval: 1,
                   getTitlesWidget: (value, meta) {
-                    // 關鍵修正：只在整數 0, 1, 2, 3, 4 印 Icon，防止小數點造成重複印製重疊
+
                     final intVal = value.round();
                     if ((value - intVal).abs() > 0.05) return const SizedBox();
 
