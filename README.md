@@ -3,16 +3,17 @@
 # Build Your City: Screen Time Tracker with Gamification
 
 **Build Your City** is a cross-platform Flutter application designed to tackle smartphone addiction and enhance digital wellbeing. It motivates users to stay offline, engage in physical activities and develop healthier digital habits by combining a screen-blocking timer with a virtual city-building game.
+**Mood Visualisation Module** powered by real-time data streams and interactive charting.
 
 ## Key Features
+* **Mood Visualisation Module (Featured)**: Real-time tracking and graphical representation of user moods and focus trends. Powered by `fl_chart` and Cloud Firestore streams to map emotional progress dynamically over daily, weekly, and monthly periods.
+* **Virtual City Building**: Earn XP through focus sessions to unlock and construct virtual buildings. Watch your city thrive as your screen time decreases.
+* **Anti-Cheat Focus Timer**: A resilient countdown timer featuring an anti-cheat mechanism that penalises users for exiting the app during active focus sessions.
+* **Activity & Multimedia Logging**: Log off-screen activities (e.g., jogging, reading) and upload photo evidence to Firebase Storage to earn bonus rewards.
+* **Comprehensive Statistics Dashboard**: Detailed bar and line graphs analyzing user focus habits and digital wellbeing metrics.
+* **Multi-Role Ecosystem**: Supports standard users, family leaderboards, and a dedicated **Counselor Dashboard** for monitoring student/user progress.
+* **Data Portability**: Securely export personal activity and session data in tab-separated values (TSV) format.
 
-* **Virtual City Building**: Earn XP through focus sessions to unlock and build visual structures. Watch your city grow while reducing your screen time.
-* **Focus Timer**: A robust countdown timer with an 'anti-cheat' system that penalises users for exiting the app during a session.
-* **Activity & Multimedia Logging**: Log off-screen activities (e.g. jogging or painting) and upload photo evidence to earn bonus rewards.
-* **Mood & Reflection**: Track your emotional state after focus sessions to see how digital use affects your mental well-being.
-* **Statistics dashboard**: Detailed bar and line graphs showing usage trends over daily, weekly and monthly periods.
-* **Family and counsellor roles**: Supports multiple profiles, family leaderboards for competition and a counsellor dashboard for monitoring students.
-* **Data portability**: All personal data can be securely exported in tab-separated values (TSV) format for backup or migration.
 
 ### Tech Stack
 
@@ -21,9 +22,11 @@
     * **Authentication**: Secure Email/Password & Role-based access.
     * **Cloud Firestore**: Real-time NoSQL database for city layouts and session logs.
     * **Cloud Storage**: Hosting for activity evidence (photos/videos).
+* **Data Visualization**: `fl_chart` for rendering dynamic line and bar charts in the Mood Visualisation & Statistics modules.
 * **State Management**: Provider & ProxyProvider for reactive UI updates.
 * **Local Storage**: SharedPreferences for offline-first settings.
 * **Notifications**: Flutter Local Notifications for break reminders and daily nudges.
+
 
 ## 📂 Project Structure
 
@@ -70,10 +73,10 @@ lib/
     │
     ├── 📂 activity/                       # 3. Reflection Module
     │   ├── session_complete_screen.dart   # Evidence upload UI
-    │   └── mood_logging_page.dart         # Emoji selection & Diary entry
+    │   └── mood_logging_page.dart         # Emoji selection & Diary entry & Mood logging & real-time trend mapping
     │
     ├── 📂 dashboard/                     # 4. Statistics Module
-    │   ├── statistics_screen.dart        # Main charts & history list
+    │   ├── statistics_screen.dart        # Main charts & history list & FL Chart integration for usage & mood visualization
     │   └── 📂 widgets/
     │       └── stat_widgets.dart         # Bar charts / Line graphs
     │
