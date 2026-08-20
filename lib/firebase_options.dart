@@ -41,49 +41,50 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyBtF-xEiGRU44NdkiRowx-b1RS7iki2P18',
-    appId: '1:679860095960:ios:254dadb5bf83acc9ddc0ad',
-    messagingSenderId: '679860095960',
-    projectId: 'groupproject-group5-a80a2',
-    storageBucket: 'groupproject-group5-a80a2.firebasestorage.app',
+    apiKey: "AIzaSyDd2sMbmMw0Cgo4tbKE2eXSXl0ThtBG-Y4",
+    appId: '1:631868110269:ios:b5b1f4b6b9badda3054ed4',
+    messagingSenderId: "631868110269",
+    projectId: "focusapp-enhanced",
+    storageBucket: "focusapp-enhanced.firebasestorage.app",
     iosBundleId: 'com.example.groupprojectGroup5',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA24F_Pjz5TrftBkIooxl8GnmjTfdqZpG8',
-    appId: '1:679860095960:web:7ebde336c7121669ddc0ad',
-    messagingSenderId: '679860095960',
-    projectId: 'groupproject-group5-a80a2',
-    authDomain: 'groupproject-group5-a80a2.firebaseapp.com',
-    storageBucket: 'groupproject-group5-a80a2.firebasestorage.app',
-    measurementId: 'G-6NTRD66WJT',
+      apiKey: "AIzaSyDd2sMbmMw0Cgo4tbKE2eXSXl0ThtBG-Y4",
+      authDomain: "focusapp-enhanced.firebaseapp.com",
+      projectId: "focusapp-enhanced",
+      storageBucket: "focusapp-enhanced.firebasestorage.app",
+      messagingSenderId: "631868110269",
+      appId: "1:631868110269:web:c65ea5acf68f6176054ed4",
+      measurementId: "G-MN0152Y00R"
   );
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA24F_Pjz5TrftBkIooxl8GnmjTfdqZpG8',
-    appId: '1:679860095960:web:4b8c71ad200ae396ddc0ad',
-    messagingSenderId: '679860095960',
-    projectId: 'groupproject-group5-a80a2',
-    authDomain: 'groupproject-group5-a80a2.firebaseapp.com',
-    storageBucket: 'groupproject-group5-a80a2.firebasestorage.app',
-    measurementId: 'G-GECX3R1CSQ',
+      apiKey: "AIzaSyDd2sMbmMw0Cgo4tbKE2eXSXl0ThtBG-Y4",
+      authDomain: "focusapp-enhanced.firebaseapp.com",
+      projectId: "focusapp-enhanced",
+      storageBucket: "focusapp-enhanced.firebasestorage.app",
+      messagingSenderId: "631868110269",
+      appId: "1:631868110269:web:c65ea5acf68f6176054ed4",
+      measurementId: "G-MN0152Y00R"
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBtF-xEiGRU44NdkiRowx-b1RS7iki2P18',
-    appId: '1:679860095960:ios:254dadb5bf83acc9ddc0ad',
-    messagingSenderId: '679860095960',
-    projectId: 'groupproject-group5-a80a2',
-    storageBucket: 'groupproject-group5-a80a2.firebasestorage.app',
+    apiKey: "AIzaSyDd2sMbmMw0Cgo4tbKE2eXSXl0ThtBG-Y4",
+    appId: '1:631868110269:ios:b5b1f4b6b9badda3054ed4',
+    messagingSenderId: "631868110269",
+    projectId: "focusapp-enhanced",
+    storageBucket: "focusapp-enhanced.firebasestorage.app",
     iosBundleId: 'com.example.groupprojectGroup5',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyDRENVJUxj3aOYdfnZtiEtgEgDcGyeJvxI',
-    appId: '1:679860095960:android:a472549a05d475c9ddc0ad',
-    messagingSenderId: '679860095960',
-    projectId: 'groupproject-group5-a80a2',
-    storageBucket: 'groupproject-group5-a80a2.firebasestorage.app',
+    apiKey: "AIzaSyDd2sMbmMw0Cgo4tbKE2eXSXl0ThtBG-Y4",
+    appId: "1:631868110269:android:32f4221ff90da435054ed4",
+    messagingSenderId: "631868110269",
+    measurementId: "G-MN0152Y00R",
+    projectId: "focusapp-enhanced",
+    storageBucket: "focusapp-enhanced.firebasestorage.app",
   );
 
 }

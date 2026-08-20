@@ -68,7 +68,7 @@ class _MoodLoggingPageState extends State<MoodLoggingPage> {
 
       _reflectionController.clear(); // Clear input after successful save
 
-      Navigator.pushReplacementNamed(context, '/gamification');
+      Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
 
     } catch (e) {
       if (mounted) {

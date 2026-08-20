@@ -1,4 +1,4 @@
-package com.example.groupproject_group5
+package com.example.groupprojectGroup5
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

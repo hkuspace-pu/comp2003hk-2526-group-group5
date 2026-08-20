@@ -24,7 +24,7 @@
 
 
     <application
-        android:label="groupproject_group5"
+        android:label="groupprojectGroup5"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
 

@@ -127,6 +127,21 @@ class FirestoreService {
     });
   }
 
+  // Get user's mood record Stream
+
+  Stream<List<Map<String, dynamic>>> getMoodLogsStream() {
+    if (uid == null) return Stream.value([]);
+
+    return _db
+        .collection('users')
+        .doc(uid!)
+        .collection('moodLogs')
+        .orderBy('timestamp', descending: true)
+        .limit(7)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList());
+  }
+
   Future<void> resetUserHistory() async {
     if (uid == null) return;
     final userDoc = _db.collection('users').doc(uid!);
